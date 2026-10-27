@@ -11,14 +11,20 @@ export function AnimatedSplashOverlay() {
 
 const keyframe = new Keyframe({
   0: {
-    transform: [{ scale: 0 }],
+    transform: [
+      { scale: 0 },
+    ],
   },
   60: {
-    transform: [{ scale: 1.2 }],
+    transform: [
+      { scale: 1.2 },
+    ],
     easing: Easing.elastic(1.2),
   },
   100: {
-    transform: [{ scale: 1 }],
+    transform: [
+      { scale: 1 },
+    ],
     easing: Easing.elastic(1.2),
   },
 });
@@ -28,12 +34,16 @@ const logoKeyframe = new Keyframe({
     opacity: 0,
   },
   60: {
-    transform: [{ scale: 1.2 }],
+    transform: [
+      { scale: 1.2 },
+    ],
     opacity: 0,
     easing: Easing.elastic(1.2),
   },
   100: {
-    transform: [{ scale: 1 }],
+    transform: [
+      { scale: 1 },
+    ],
     opacity: 1,
     easing: Easing.elastic(1.2),
   },
@@ -41,16 +51,24 @@ const logoKeyframe = new Keyframe({
 
 const glowKeyframe = new Keyframe({
   0: {
-    transform: [{ rotateZ: '-180deg' }, { scale: 0.8 }],
+    transform: [
+      { rotateZ: '-180deg' },
+      { scale: 0.8 },
+    ],
     opacity: 0,
   },
   [DURATION / 1000]: {
-    transform: [{ rotateZ: '0deg' }, { scale: 1 }],
+    transform: [
+      { rotateZ: '0deg' },
+      { scale: 1 },
+    ],
     opacity: 1,
     easing: Easing.elastic(0.7),
   },
   100: {
-    transform: [{ rotateZ: '7200deg' }],
+    transform: [
+      { rotateZ: '7200deg' },
+    ],
   },
 });
 
