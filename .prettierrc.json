@@ -3,13 +3,8 @@
   "singleQuote": true,
   "trailingComma": "all",
   "tabWidth": 2,
-  "printWidth": 100,
+  "printWidth": 70,
   "bracketSpacing": true,
   "arrowParens": "always",
-  "endOfLine": "lf",
-  "plugins": [
-    "prettier-plugin-multiline-arrays"
-  ],
-  "multilineArraysWrapThreshold": 0,
-  "multilineArraysLinePattern": "1"
+  "endOfLine": "lf"
 }

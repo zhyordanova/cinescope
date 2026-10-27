@@ -4,34 +4,22 @@ const expoConfig = require('eslint-config-expo/flat');
 const prettierConfig = require('eslint-config-prettier/flat');
 
 module.exports = defineConfig([
-  globalIgnores([
-    'dist/**',
-    'coverage/**',
-    '.expo/**',
-  ]),
+  globalIgnores(['dist/**', 'coverage/**', '.expo/**']),
 
   expoConfig,
 
   {
-    files: [
-      '**/*.{ts,tsx}',
-    ],
+    files: ['**/*.{ts,tsx}'],
     rules: {
       'no-console': [
         'warn',
         {
-          allow: [
-            'warn',
-            'error',
-          ],
+          allow: ['warn', 'error'],
         },
       ],
       'no-debugger': 'error',
       'prefer-const': 'error',
-      eqeqeq: [
-        'error',
-        'always',
-      ],
+      eqeqeq: ['error', 'always'],
     },
   },
 
