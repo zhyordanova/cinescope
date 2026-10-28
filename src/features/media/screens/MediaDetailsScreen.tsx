@@ -3,14 +3,17 @@ import {
   useLocalSearchParams,
   useRouter,
 } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 
-import { mockMedia } from '../mockMedia';
+import { MEDIA_ERROR_MESSAGES } from '../constants/mediaErrorMessages';
+import { useMediaDetails } from '../hooks/useMediaDetails';
+import { isValidMediaId } from '../utils/isValidMediaId';
 
 export default function MediaDetailsScreen() {
   const { id } = useLocalSearchParams<{
@@ -18,10 +21,14 @@ export default function MediaDetailsScreen() {
   }>();
 
   const router = useRouter();
-  const isValidId = typeof id === 'string' && /^tt\d{7,}$/.test(id);
-  const media = isValidId
-    ? mockMedia.find((item) => item.id === id)
-    : undefined;
+  const isValidId = isValidMediaId(id);
+  const {
+    data: media,
+    error,
+    isPending,
+    isFetching,
+    refetch,
+  } = useMediaDetails(isValidId ? id : '');
   const canGoBack = useCanGoBack();
 
   function returnToHome() {
@@ -44,44 +51,82 @@ export default function MediaDetailsScreen() {
               ? 'Invalid media ID'
               : media
                 ? media.title
-                : 'Mock title unavailable'}
+                : error
+                  ? 'Unable to load details'
+                  : 'Loading details'}
           </ThemedText>
           {!isValidId ? (
             <ThemedText accessibilityRole="alert">
-              A single IMDb title ID is required, starting with tt
-              followed by at least seven digits.
+              {MEDIA_ERROR_MESSAGES.invalidId}
             </ThemedText>
           ) : media ? (
             <>
               <ThemedText type="smallBold">
-                {media.type === 'movie' ? 'Movie' : 'Series'}
+                {media.type === 'movie'
+                  ? 'Movie'
+                  : media.type === 'series'
+                    ? 'Series'
+                    : 'Episode'}
               </ThemedText>
               <ThemedText>IMDb ID: {media.id}</ThemedText>
+              {media.year !== null && (
+                <ThemedText>Year: {media.year}</ThemedText>
+              )}
+              {media.genres.length > 0 && (
+                <ThemedText>
+                  Genres: {media.genres.join(', ')}
+                </ThemedText>
+              )}
+              {media.runtimeMinutes !== null && (
+                <ThemedText>
+                  Runtime: {media.runtimeMinutes} min
+                </ThemedText>
+              )}
+              {media.imdbRating !== null && (
+                <ThemedText>
+                  IMDb rating: {media.imdbRating}/10
+                </ThemedText>
+              )}
+              {media.type === 'series' &&
+                media.totalSeasons !== null && (
+                  <ThemedText>
+                    Seasons: {media.totalSeasons}
+                  </ThemedText>
+                )}
               <ThemedText themeColor="textSecondary">
-                Temporary mock details for navigation testing. Real
-                metadata will come from OMDb in a later increment.
+                {media.plot ?? 'Plot unavailable.'}
               </ThemedText>
             </>
           ) : (
-            <ThemedText accessibilityRole="alert">
-              The ID {id} has a valid format, but no temporary mock
-              title matches it. No API request was made.
+            <ThemedText
+              accessibilityLiveRegion="polite"
+              accessibilityRole={error ? 'alert' : undefined}
+            >
+              {error
+                ? error.message
+                : isPending
+                  ? 'Loading media details…'
+                  : null}
             </ThemedText>
           )}
-          <Pressable
-            accessibilityRole="button"
+          {isValidId && error && (
+            <>
+              {media && (
+                <ThemedText accessibilityRole="alert">
+                  {error.message}
+                </ThemedText>
+              )}
+              <ThemedButton
+                label={isFetching ? 'Retrying…' : 'Retry'}
+                disabled={isFetching}
+                onPress={() => void refetch()}
+              />
+            </>
+          )}
+          <ThemedButton
+            label={canGoBack ? 'Go back' : 'Go to Home'}
             onPress={returnToHome}
-            style={({ pressed }) => pressed && styles.pressed}
-          >
-            <ThemedView
-              type="backgroundElement"
-              style={styles.button}
-            >
-              <ThemedText>
-                {canGoBack ? 'Go back' : 'Go to Home'}
-              </ThemedText>
-            </ThemedView>
-          </Pressable>
+          />
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
@@ -98,14 +143,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     padding: Spacing.three,
     gap: Spacing.three,
-  },
-  button: {
-    minHeight: 48,
-    justifyContent: 'center',
-    padding: Spacing.three,
-    borderRadius: Spacing.two,
-  },
-  pressed: {
-    opacity: 0.7,
   },
 });

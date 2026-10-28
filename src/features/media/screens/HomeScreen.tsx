@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -32,19 +33,10 @@ export default function HomeScreen() {
                 Temporary mock titles for testing navigation. No API
                 data is loaded.
               </ThemedText>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Increment check counter"
+              <ThemedButton
+                label="Increment check counter"
                 onPress={() => setCheckCount((count) => count + 1)}
-                style={({ pressed }) => pressed && styles.pressed}
-              >
-                <ThemedView
-                  type="backgroundElement"
-                  style={styles.button}
-                >
-                  <ThemedText>Increment check counter</ThemedText>
-                </ThemedView>
-              </Pressable>
+              />
               <ThemedText accessibilityLiveRegion="polite">
                 Navigation checks: {checkCount}
               </ThemedText>
@@ -110,12 +102,6 @@ const styles = StyleSheet.create({
   header: {
     gap: Spacing.three,
     marginBottom: Spacing.four,
-  },
-  button: {
-    minHeight: 48,
-    justifyContent: 'center',
-    padding: Spacing.three,
-    borderRadius: Spacing.two,
   },
   card: {
     gap: Spacing.two,
