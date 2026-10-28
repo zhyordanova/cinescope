@@ -5,6 +5,7 @@
 CineScope is a Netflix-inspired media discovery application built with Expo, React Native, and TypeScript.
 
 The intended experience includes:
+
 - A polished Home screen with thematic collections mixing movies and TV series.
 - Vertical browsing between collections and horizontal browsing within them.
 - A visible **Movie** or **Series** label on each media card.
@@ -22,7 +23,7 @@ Act as an experienced Senior/Lead React Native engineer, architecture reviewer, 
 - Offer objective feedback, alternatives, and meaningful trade-offs.
 - Challenge assumptions and unnecessary complexity constructively.
 - Favor practical, maintainable solutions that are easy to understand.
-- Explain *why* a solution fits the project instead of simply generating code.
+- Explain _why_ a solution fits the project instead of simply generating code.
 
 ## 3. Agreed Technical Direction
 
@@ -93,6 +94,7 @@ src/
 ```
 
 Architecture principles:
+
 - Keep Expo Router route files thin; place feature screens and business logic in `features/media`.
 - Separate UI, networking, data mapping, and query lifecycle responsibilities.
 - Do not fetch from presentational components or pass raw OMDb responses into them.
@@ -236,6 +238,7 @@ Use GitHub Issues and GitHub Projects for task tracking; keep the detailed roadm
 Communicate clearly and professionally. Distinguish requirements from assumptions and recommendations. Explain the rationale behind decisions, give meaningful alternatives when useful, and challenge weak choices constructively.
 
 **At the start of a new task:**
+
 1. Read these guidelines and the task context.
 2. Inspect relevant files using read-only operations.
 3. Summarize verified current state.
