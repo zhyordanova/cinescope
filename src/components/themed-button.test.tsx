@@ -47,7 +47,7 @@ describe('ThemedButton', () => {
     await fireEvent.press(
       screen.getByRole('button', { name: 'Retry', disabled: false }),
     );
-    
+
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 });

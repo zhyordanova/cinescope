@@ -1,6 +1,11 @@
 import { describe, expect, it } from '@jest/globals';
 
 import {
+  omdbFailure,
+  omdbInvalidKeyFailure,
+} from '../test-utils/omdbFixtures';
+
+import {
   mapOmdbDetailsResponse,
   mapOmdbSearchResponse,
   OmdbResponseError,
@@ -33,23 +38,19 @@ describe('OMDb response contracts', () => {
   it('parses Search success and failure as distinct variants', () => {
     expect(parseOmdbSearchResponse(search())).toEqual(search());
 
-    expect(
-      parseOmdbSearchResponse({
-        Response: 'False',
-        Error: 'Movie not found!',
-      }),
-    ).toEqual({ Response: 'False', Error: 'Movie not found!' });
+    expect(parseOmdbSearchResponse(omdbFailure)).toEqual({
+      Response: 'False',
+      Error: 'Movie not found!',
+    });
   });
 
   it('parses Details success and failure as distinct variants', () => {
     expect(parseOmdbDetailsResponse(details)).toEqual(details);
 
-    expect(
-      parseOmdbDetailsResponse({
-        Response: 'False',
-        Error: 'Invalid API key!',
-      }),
-    ).toEqual({ Response: 'False', Error: 'Invalid API key!' });
+    expect(parseOmdbDetailsResponse(omdbInvalidKeyFailure)).toEqual({
+      Response: 'False',
+      Error: 'Invalid API key!',
+    });
   });
 
   it.each([null, undefined, [], 'invalid', 42, {}])(
@@ -114,6 +115,7 @@ describe('OMDb response contracts', () => {
     { Type: 'game' },
   ])('rejects missing/malformed identity fields: %p', (fields) => {
     const item = { ...summary, ...fields };
+
     expect(() => parseOmdbSearchResponse(search(item))).toThrow(
       OmdbResponseError,
     );
@@ -167,13 +169,19 @@ describe('domain mapping', () => {
         new OmdbResponseError('api', 'Request limit reached!'),
       );
 
+      let error: unknown;
+
       try {
-        map({ Response: 'False', Error: 'Invalid API key!' });
-      } catch (error) {
-        expect(error).toBeInstanceOf(OmdbResponseError);
-        if (!(error instanceof OmdbResponseError)) throw error;
-        expect(error.kind).toBe('api');
+        map(omdbInvalidKeyFailure);
+      } catch (caught) {
+        error = caught;
       }
+
+      expect(error).toBeInstanceOf(OmdbResponseError);
+      expect(error).toMatchObject({
+        kind: 'api',
+        message: omdbInvalidKeyFailure.Error,
+      });
     },
   );
 

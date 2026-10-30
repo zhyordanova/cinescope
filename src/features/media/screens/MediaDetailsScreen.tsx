@@ -12,6 +12,10 @@ import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 
 import { MEDIA_ERROR_MESSAGES } from '../constants/mediaErrorMessages';
+import {
+  MEDIA_TYPE_LABELS,
+  MEDIA_UI_MESSAGES,
+} from '../constants/mediaUiMessages';
 import { useMediaDetails } from '../hooks/useMediaDetails';
 import { isValidMediaId } from '../utils/isValidMediaId';
 
@@ -48,12 +52,12 @@ export default function MediaDetailsScreen() {
         <ScrollView contentContainerStyle={styles.content}>
           <ThemedText type="subtitle" accessibilityRole="header">
             {!isValidId
-              ? 'Invalid media ID'
+              ? MEDIA_UI_MESSAGES.details.invalidIdTitle
               : media
                 ? media.title
                 : error
-                  ? 'Unable to load details'
-                  : 'Loading details'}
+                  ? MEDIA_UI_MESSAGES.details.errorTitle
+                  : MEDIA_UI_MESSAGES.details.loadingTitle}
           </ThemedText>
           {!isValidId ? (
             <ThemedText accessibilityRole="alert">
@@ -62,39 +66,46 @@ export default function MediaDetailsScreen() {
           ) : media ? (
             <>
               <ThemedText type="smallBold">
-                {media.type === 'movie'
-                  ? 'Movie'
-                  : media.type === 'series'
-                    ? 'Series'
-                    : 'Episode'}
+                {MEDIA_TYPE_LABELS[media.type]}
               </ThemedText>
-              <ThemedText>IMDb ID: {media.id}</ThemedText>
+              <ThemedText>
+                {MEDIA_UI_MESSAGES.details.imdbId(media.id)}
+              </ThemedText>
               {media.year !== null && (
-                <ThemedText>Year: {media.year}</ThemedText>
+                <ThemedText>
+                  {MEDIA_UI_MESSAGES.details.year(media.year)}
+                </ThemedText>
               )}
               {media.genres.length > 0 && (
                 <ThemedText>
-                  Genres: {media.genres.join(', ')}
+                  {MEDIA_UI_MESSAGES.details.genres(media.genres)}
                 </ThemedText>
               )}
               {media.runtimeMinutes !== null && (
                 <ThemedText>
-                  Runtime: {media.runtimeMinutes} min
+                  {MEDIA_UI_MESSAGES.details.runtime(
+                    media.runtimeMinutes,
+                  )}
                 </ThemedText>
               )}
               {media.imdbRating !== null && (
                 <ThemedText>
-                  IMDb rating: {media.imdbRating}/10
+                  {MEDIA_UI_MESSAGES.details.imdbRating(
+                    media.imdbRating,
+                  )}
                 </ThemedText>
               )}
               {media.type === 'series' &&
                 media.totalSeasons !== null && (
                   <ThemedText>
-                    Seasons: {media.totalSeasons}
+                    {MEDIA_UI_MESSAGES.details.seasons(
+                      media.totalSeasons,
+                    )}
                   </ThemedText>
                 )}
               <ThemedText themeColor="textSecondary">
-                {media.plot ?? 'Plot unavailable.'}
+                {media.plot ??
+                  MEDIA_UI_MESSAGES.details.plotUnavailable}
               </ThemedText>
             </>
           ) : (
@@ -105,7 +116,7 @@ export default function MediaDetailsScreen() {
               {error
                 ? error.message
                 : isPending
-                  ? 'Loading media details…'
+                  ? MEDIA_UI_MESSAGES.details.loading
                   : null}
             </ThemedText>
           )}
@@ -117,14 +128,22 @@ export default function MediaDetailsScreen() {
                 </ThemedText>
               )}
               <ThemedButton
-                label={isFetching ? 'Retrying…' : 'Retry'}
+                label={
+                  isFetching
+                    ? MEDIA_UI_MESSAGES.retrying
+                    : MEDIA_UI_MESSAGES.retry
+                }
                 disabled={isFetching}
                 onPress={() => void refetch()}
               />
             </>
           )}
           <ThemedButton
-            label={canGoBack ? 'Go back' : 'Go to Home'}
+            label={
+              canGoBack
+                ? MEDIA_UI_MESSAGES.goBack
+                : MEDIA_UI_MESSAGES.goHome
+            }
             onPress={returnToHome}
           />
         </ScrollView>

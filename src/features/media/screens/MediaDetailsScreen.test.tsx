@@ -25,7 +25,14 @@ import {
 } from 'expo-router';
 
 import { MEDIA_ERROR_MESSAGES } from '../constants/mediaErrorMessages';
+import {
+  MEDIA_TYPE_LABELS,
+  MEDIA_UI_MESSAGES,
+} from '../constants/mediaUiMessages';
 import { mediaQueryKeys } from '../queries/media.queries';
+import { omdbFailure } from '../test-utils/omdbFixtures';
+import { setupOmdbTestEnvironment } from '../test-utils/omdbTestEnvironment';
+import { UNEXPECTED_FETCH_MESSAGE } from '../test-utils/testMessages';
 
 import MediaDetailsScreen from './MediaDetailsScreen';
 
@@ -45,7 +52,7 @@ jest.mock(
     >('react-native-safe-area-context/jest/mock').default,
 );
 
-const originalKey = process.env.EXPO_PUBLIC_OMDB_API_KEY;
+setupOmdbTestEnvironment();
 
 const router = {
   back: jest.fn(),
@@ -86,12 +93,10 @@ function deferredResponse() {
 beforeEach(() => {
   jest
     .spyOn(globalThis, 'fetch')
-    .mockRejectedValue(
-      new Error('Unexpected Fetch request in test.'),
-    );
-  process.env.EXPO_PUBLIC_OMDB_API_KEY =
-    'test-key-not-a-real-credential';
+    .mockRejectedValue(new Error(UNEXPECTED_FETCH_MESSAGE));
+
   client = new QueryClient();
+
   jest
     .mocked(useLocalSearchParams)
     .mockReturnValue({ id: movie.imdbID });
@@ -112,12 +117,6 @@ afterEach(async () => {
   client.clear();
   jest.restoreAllMocks();
   jest.clearAllMocks();
-
-  if (originalKey === undefined) {
-    delete process.env.EXPO_PUBLIC_OMDB_API_KEY;
-  } else {
-    process.env.EXPO_PUBLIC_OMDB_API_KEY = originalKey;
-  }
 });
 
 describe('MediaDetailsScreen', () => {
@@ -133,7 +132,9 @@ describe('MediaDetailsScreen', () => {
       await renderDetails();
 
       expect(
-        screen.getByRole('header', { name: 'Invalid media ID' }),
+        screen.getByRole('header', {
+          name: MEDIA_UI_MESSAGES.details.invalidIdTitle,
+        }),
       ).toBeTruthy();
 
       expect(screen.getByRole('alert')).toBeTruthy();
@@ -143,7 +144,9 @@ describe('MediaDetailsScreen', () => {
       ).toBeTruthy();
 
       expect(
-        screen.queryByRole('button', { name: 'Retry' }),
+        screen.queryByRole('button', {
+          name: MEDIA_UI_MESSAGES.retry,
+        }),
       ).toBeNull();
 
       expect(fetchMock).not.toHaveBeenCalled();
@@ -159,7 +162,10 @@ describe('MediaDetailsScreen', () => {
 
     await renderDetails();
 
-    expect(screen.getByText('Loading media details…')).toBeTruthy();
+    expect(
+      screen.getByText(MEDIA_UI_MESSAGES.details.loading),
+    ).toBeTruthy();
+
     expect(screen.queryByText(movie.Title)).toBeNull();
 
     await act(async () => response.resolve(respond(movie)));
@@ -168,13 +174,31 @@ describe('MediaDetailsScreen', () => {
       await screen.findByRole('header', { name: movie.Title }),
     ).toBeTruthy();
 
-    expect(screen.getByText('Movie')).toBeTruthy();
-    expect(screen.getByText('Year: 1999')).toBeTruthy();
-    expect(screen.getByText('Genres: Action, Sci-Fi')).toBeTruthy();
-    expect(screen.getByText('Runtime: 136 min')).toBeTruthy();
-    expect(screen.getByText('IMDb rating: 8.7/10')).toBeTruthy();
+    expect(screen.getByText(MEDIA_TYPE_LABELS.movie)).toBeTruthy();
+    expect(
+      screen.getByText(MEDIA_UI_MESSAGES.details.year(movie.Year)),
+    ).toBeTruthy();
+
+    expect(
+      screen.getByText(
+        MEDIA_UI_MESSAGES.details.genres(['Action', 'Sci-Fi']),
+      ),
+    ).toBeTruthy();
+
+    expect(
+      screen.getByText(MEDIA_UI_MESSAGES.details.runtime(136)),
+    ).toBeTruthy();
+
+    expect(
+      screen.getByText(MEDIA_UI_MESSAGES.details.imdbRating(8.7)),
+    ).toBeTruthy();
+
     expect(screen.getByText(movie.Plot)).toBeTruthy();
-    expect(screen.queryByText('Loading media details…')).toBeNull();
+
+    expect(
+      screen.queryByText(MEDIA_UI_MESSAGES.details.loading),
+    ).toBeNull();
+
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     const url = new URL(String(fetchMock.mock.calls[0]?.[0]));
@@ -183,9 +207,9 @@ describe('MediaDetailsScreen', () => {
   });
 
   it.each([
-    ['series', 'Series', true],
-    ['movie', 'Movie', false],
-    ['episode', 'Episode', false],
+    ['series', MEDIA_TYPE_LABELS.series, true],
+    ['movie', MEDIA_TYPE_LABELS.movie, false],
+    ['episode', MEDIA_TYPE_LABELS.episode, false],
   ] as const)(
     'shows the %s label and seasons only for a series',
     async (type, label, showsSeasons) => {
@@ -202,9 +226,13 @@ describe('MediaDetailsScreen', () => {
       expect(screen.getByText(label)).toBeTruthy();
 
       if (showsSeasons) {
-        expect(screen.getByText('Seasons: 5')).toBeTruthy();
+        expect(
+          screen.getByText(MEDIA_UI_MESSAGES.details.seasons(5)),
+        ).toBeTruthy();
       } else {
-        expect(screen.queryByText(/Seasons:/)).toBeNull();
+        expect(
+          screen.queryByText(MEDIA_UI_MESSAGES.details.seasons(5)),
+        ).toBeNull();
       }
     },
   );
@@ -225,7 +253,11 @@ describe('MediaDetailsScreen', () => {
 
     await renderDetails();
 
-    expect(await screen.findByText('Plot unavailable.')).toBeTruthy();
+    expect(
+      await screen.findByText(
+        MEDIA_UI_MESSAGES.details.plotUnavailable,
+      ),
+    ).toBeTruthy();
 
     expect(
       screen.queryByText(
@@ -241,19 +273,17 @@ describe('MediaDetailsScreen', () => {
 
     const fetchMock = jest
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(
-        respond({ Response: 'False', Error: 'Movie not found!' }),
-      )
+      .mockResolvedValueOnce(respond(omdbFailure))
       .mockReturnValueOnce(retryResponse.promise);
 
     await renderDetails();
 
     expect(await screen.findByRole('alert')).toBeTruthy();
-    expect(screen.getByText('Movie not found!')).toBeTruthy();
+    expect(screen.getByText(omdbFailure.Error)).toBeTruthy();
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     await fireEvent.press(
-      screen.getByRole('button', { name: 'Retry' }),
+      screen.getByRole('button', { name: MEDIA_UI_MESSAGES.retry }),
     );
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
@@ -265,7 +295,7 @@ describe('MediaDetailsScreen', () => {
     expect(screen.queryByRole('alert')).toBeNull();
 
     expect(
-      screen.queryByRole('button', { name: 'Retry' }),
+      screen.queryByRole('button', { name: MEDIA_UI_MESSAGES.retry }),
     ).toBeNull();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -301,7 +331,7 @@ describe('MediaDetailsScreen', () => {
     ).toBeTruthy();
 
     expect(
-      screen.getByRole('button', { name: 'Retry' }),
+      screen.getByRole('button', { name: MEDIA_UI_MESSAGES.retry }),
     ).toBeTruthy();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -316,7 +346,7 @@ describe('MediaDetailsScreen', () => {
     await renderDetails();
 
     await fireEvent.press(
-      screen.getByRole('button', { name: 'Go back' }),
+      screen.getByRole('button', { name: MEDIA_UI_MESSAGES.goBack }),
     );
 
     expect(router.back).toHaveBeenCalledTimes(1);
@@ -328,7 +358,7 @@ describe('MediaDetailsScreen', () => {
     await renderDetails();
 
     await fireEvent.press(
-      screen.getByRole('button', { name: 'Go to Home' }),
+      screen.getByRole('button', { name: MEDIA_UI_MESSAGES.goHome }),
     );
 
     expect(router.replace).toHaveBeenCalledWith('/');
@@ -342,7 +372,7 @@ describe('MediaDetailsScreen', () => {
     await renderDetails();
 
     await fireEvent.press(
-      screen.getByRole('button', { name: 'Go back' }),
+      screen.getByRole('button', { name: MEDIA_UI_MESSAGES.goBack }),
     );
 
     expect(router.replace).toHaveBeenCalledWith('/');
