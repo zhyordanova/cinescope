@@ -44,7 +44,9 @@ export function CinematicBanner() {
         source={getCinematicBannerArtwork(width)}
         style={styles.artwork}
         contentFit="cover"
-        contentPosition="right top"
+        contentPosition={
+          Platform.OS === 'web' ? 'right center' : 'right top'
+        }
         cachePolicy="memory-disk"
         transition={150}
         accessibilityRole="none"

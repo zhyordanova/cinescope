@@ -66,10 +66,16 @@ describe('CinematicBanner', () => {
 
     const webRender = await render(<CinematicBanner />);
     const webBanner = webRender.getByTestId('cinematic-banner');
-    
+
     expect(
       StyleSheet.flatten(webBanner.props.style).justifyContent,
     ).toBe('flex-start');
+    
+    expect(
+      webRender.getByTestId('cinematic-banner-artwork', {
+        includeHiddenElements: true,
+      }).props.contentPosition,
+    ).toBe('right center');
   });
 
   it('selects mobile and wide artwork at the approved responsive breakpoint', () => {
