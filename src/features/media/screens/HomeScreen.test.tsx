@@ -122,9 +122,18 @@ describe('HomeScreen', () => {
         .getAllByRole('header')
         .map((header) => header.props.children),
     ).toEqual([
-      MEDIA_UI_MESSAGES.homeTitle,
+      MEDIA_UI_MESSAGES.home.bannerHeadline,
       ...MEDIA_COLLECTIONS.map((collection) => collection.title),
     ]);
+
+    expect(screen.getByTestId('cinescope-logo').props).toMatchObject({
+      accessibilityRole: 'image',
+      accessibilityLabel: MEDIA_UI_MESSAGES.home.logoAccessibleLabel,
+      contentFit: 'contain',
+      source: require('../../../../assets/cinescope-logo.png'),
+    });
+    
+    expect(screen.getByTestId('cinematic-banner')).toBeTruthy();
 
     expect(screen.getByText('Inception')).toBeTruthy();
     expect(screen.queryByText(omdbEpisode.Title)).toBeNull();

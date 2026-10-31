@@ -7,7 +7,12 @@ export const MEDIA_TYPE_LABELS = {
 } as const satisfies Record<MediaType, string>;
 
 export const MEDIA_UI_MESSAGES = {
-  homeTitle: 'Movies and series',
+  home: {
+    logoAccessibleLabel: 'CineScope',
+    bannerHeadline: 'Every story starts with discovery.',
+    bannerSubtitle:
+      'Explore movies, series, and worlds beyond the ordinary.',
+  },
   posterUnavailable: 'Poster unavailable',
   openMedia: (title: string, type: MediaType, year: string | null) =>
     `Open ${title}, ${MEDIA_TYPE_LABELS[type]}${year ? `, ${year}` : ''}`,

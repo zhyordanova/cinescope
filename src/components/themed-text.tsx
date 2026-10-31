@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   type TextProps,
-  useWindowDimensions,
 } from 'react-native';
 
 import {
@@ -14,6 +13,7 @@ import {
   Typography,
 } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
 export type ThemedTextProps = TextProps & {
   type?:
@@ -35,7 +35,7 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const theme = useTheme();
-  const { width } = useWindowDimensions();
+  const width = useResponsiveWidth();
   const size = width >= Breakpoints.desktop ? 'desktop' : 'mobile';
   const responsiveStyle =
     type === 'title' || type === 'subtitle'

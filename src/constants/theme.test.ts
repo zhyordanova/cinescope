@@ -49,7 +49,7 @@ describe('theme tokens', () => {
       mobile: 36,
       desktop: 48,
     });
-    
+
     expect(Typography.fontSizes.subtitle).toEqual({
       mobile: 24,
       desktop: 32,
