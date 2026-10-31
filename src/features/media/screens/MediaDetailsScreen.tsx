@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
-    padding: Spacing.three,
-    gap: Spacing.three,
+    padding: Spacing.lg,
+    gap: Spacing.lg,
   },
 });

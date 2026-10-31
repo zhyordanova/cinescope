@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Spacing, Typography } from '@/constants/theme';
 
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
 import { useMediaCollection } from '../hooks/useMediaCollection';
@@ -79,13 +79,13 @@ export function SearchMediaSection({
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.two,
+    gap: Spacing.sm,
   },
   status: {
-    paddingHorizontal: Spacing.three,
-    gap: Spacing.two,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.sm,
   },
   heading: {
-    fontWeight: '700',
+    fontWeight: Typography.fontWeights.bold,
   },
 });

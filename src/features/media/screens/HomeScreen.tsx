@@ -74,13 +74,13 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.lg,
   },
   header: {
-    paddingHorizontal: Spacing.three,
-    marginBottom: Spacing.four,
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.xl,
   },
   separator: {
-    height: Spacing.four,
+    height: Spacing.xl,
   },
 });

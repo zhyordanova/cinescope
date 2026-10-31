@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Radii, Sizing, Spacing } from '@/constants/theme';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -24,7 +24,7 @@ export function ThemedButton({
       onPress={onPress}
       style={({ pressed }) => pressed && styles.pressed}
     >
-      <ThemedView type="backgroundElement" style={styles.button}>
+      <ThemedView type="surface" style={styles.button}>
         <ThemedText>{label}</ThemedText>
       </ThemedView>
     </Pressable>
@@ -33,10 +33,10 @@ export function ThemedButton({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 48,
+    minHeight: Sizing.touchTarget,
     justifyContent: 'center',
-    padding: Spacing.three,
-    borderRadius: Spacing.two,
+    padding: Spacing.lg,
+    borderRadius: Radii.surface,
   },
   pressed: {
     opacity: 0.7,
