@@ -1,13 +1,89 @@
 # CineScope
 
 CineScope is an Expo, React Native, and TypeScript media discovery
-app. The current increment implements Home → Media Details → Back
-with temporary Home fixtures and live OMDb Details. The production
-discovery UI and live Home collections are not implemented yet.
+app. Home displays curated and live OMDb Search collections in a
+vertical list of horizontal media rows. Selecting a card opens live
+OMDb Details through the Home → Media Details → Back flow.
+
+## Phase 4 collection foundation
+
+[Collection definitions](./src/features/media/constants/mediaCollections.ts)
+configure Beyond Reality, Batman on Screen, Journeys & Discoveries,
+and Holiday Magic (OMDb search term `Christmas`) in that order on Home.
+
+Beyond Reality uses eight local
+[`MediaSummary` snapshots](./src/features/media/data/beyondRealityMedia.ts) from OMDb
+Details responses validated on October 29, 2026, alternating Movie and
+Series in the approved order. Only summary fields and remote poster URLs
+are stored; images are not bundled. URLs passed format validation, not
+image-download verification. These snapshots are static and may need
+future maintenance; they must not seed the live Details query cache or
+trigger Details requests on Home.
+
+The three Search definitions allow movies and series and cap each row
+at ten cards.
+[`useMediaCollection`](./src/features/media/hooks/useMediaCollection.ts)
+fetches Search collections using page 1 without a type filter, reusing
+the existing Search hook, query keys, caching, cancellation, and retries.
+It exposes derived `items` alongside the original query state and
+`refetch`: items are undefined before data is available, and an empty
+array means a successful response has no eligible cards. Selection
+does not modify the cached Search result. Each collection has an
+independent lifecycle; curated snapshots do not use this hook.
+[Selection rules](./src/features/media/utils/selectCollectionItems.ts)
+filter allowed types, deduplicate IMDb IDs within a collection (first
+eligible occurrence wins), then apply the limit, preserving order.
+Missing posters and years do not exclude an otherwise eligible card.
+The same title may appear in different collections. These are title-based
+collections, not genre, popularity, or trending rankings.
+
+Hook integration tests use mocked Fetch with the real data layer to
+verify loading, selection, empty results, errors and manual retry,
+shared-cache reuse, and exactly three initial Search requests with no
+Details requests. Run
+`npm test -- --runInBand src/features/media/hooks/useMediaCollection.test.tsx`.
+
+[`SearchMediaSection`](./src/features/media/components/SearchMediaSection.tsx)
+connects each Search collection to a presentational media row with
+independent loading, error, empty, and retry states. Cached cards stay
+visible if a background refresh fails. With an empty cache and no
+retries, mounting all Home sections makes three Search requests and
+no Details requests. The temporary navigation counter and mock titles
+have been removed.
+
+Home integration tests cover collection order, independent states and
+retry, cached-data refresh errors, episode exclusion, request counts,
+and ID-only navigation. Run
+`npm test -- --runInBand src/features/media/screens/HomeScreen.test.tsx`.
+Browser validation with mocked OMDb data confirmed movie and series
+Details navigation, the screen Back action, and browser-history Back.
+In the tested desktop flow, returning from series Details preserved
+Home's vertical offset (772px) and the Holiday Magic row's horizontal
+offset (152px). A 390px-wide web viewport showed a partial next card
+without page-level horizontal overflow; arrow controls reached the
+end and supported keyboard activation.
+These checks do not establish native behavior: Android system Back,
+iOS swipe-back, native swipe scrolling, font scaling, and scroll
+preservation still require device verification.
+
+On web, overflowing media rows offer accessible left/right arrow overlays
+at the sides of each list, rather than text buttons beside the heading,
+that scroll by one viewport width and disable at the start/end.
+Controls are hidden when all cards fit; native rows retain swipe
+scrolling without these buttons. Mouse and keyboard control movement
+and boundary states have been verified in the browser.
 
 ## Current navigation
 
-Counter, Retry, and Back actions share
+Media screen/component text and accessibility-label formatters live in
+[mediaUiMessages.ts](./src/features/media/constants/mediaUiMessages.ts).
+Collection titles remain in collection configuration, and API error
+messages remain separate from UI copy.
+Component and screen tests reuse these messages for text queries;
+colocated message tests use literal expectations to independently verify
+dynamic formatting and optional-year accessibility labels.
+
+Retry and Back actions share
 [ThemedButton](./src/components/themed-button.tsx), which provides
 consistent themed styling, button accessibility, and disabled behavior.
 Media cards remain separate.
@@ -23,7 +99,8 @@ Media cards remain separate.
   Movie, series, and episode labels are supported, and seasons are
   shown only for series when available.
 - Invalid IDs do not trigger requests. Direct entry without Stack
-  history offers a Home action. Poster UI remains deferred.
+  history offers a Home action. Home cards use cached remote posters
+  with a fallback; Details poster UI remains deferred.
 
 ## Startup
 
@@ -35,6 +112,11 @@ overlay or manual startup delay.
 ## Validation
 
 Run `npm run check` for TypeScript, ESLint, and Prettier validation.
+
+The Phase 4 validation run passed all 219 Jest tests, TypeScript, and
+ESLint. The full `npm run check` remains blocked by a Prettier warning
+in [themed-button.test.tsx](./src/components/themed-button.test.tsx);
+that unrelated file was left unchanged.
 
 ## Data contracts and tests
 
@@ -86,8 +168,8 @@ functions. These return mapped domain data, not raw OMDb responses.
 
 `EXPO_PUBLIC_` values are included in the client bundle and are not
 secrets. Never commit a real key or paste it into logs or screenshots.
-No key is required for Home fixtures or automated tests. Live Details
-requires a configured key.
+No key is required for automated tests or the curated Home row.
+Live Search collections and Details require a configured key.
 Key activation and real API connectivity must be verified separately;
 mocked tests do not establish either.
 

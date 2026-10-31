@@ -13,6 +13,9 @@ import {
 } from '@tanstack/react-query';
 
 import { createAbortError } from '../test-utils/createAbortError';
+import { omdbInvalidKeyFailure } from '../test-utils/omdbFixtures';
+import { setupOmdbTestEnvironment } from '../test-utils/omdbTestEnvironment';
+import { UNEXPECTED_FETCH_MESSAGE } from '../test-utils/testMessages';
 
 import {
   mediaDetailsOptions,
@@ -20,7 +23,7 @@ import {
   mediaSearchOptions,
 } from './media.queries';
 
-const originalKey = process.env.EXPO_PUBLIC_OMDB_API_KEY;
+setupOmdbTestEnvironment();
 
 const movie = {
   imdbID: 'tt0133093',
@@ -48,11 +51,7 @@ function detailsResponse() {
 beforeEach(() => {
   jest
     .spyOn(globalThis, 'fetch')
-    .mockRejectedValue(
-      new Error('Unexpected Fetch request in test.'),
-    );
-  process.env.EXPO_PUBLIC_OMDB_API_KEY =
-    'test-key-not-a-real-credential';
+    .mockRejectedValue(new Error(UNEXPECTED_FETCH_MESSAGE));
   client = new QueryClient();
 });
 
@@ -60,11 +59,6 @@ afterEach(() => {
   client.clear();
   jest.restoreAllMocks();
   jest.useRealTimers();
-  if (originalKey === undefined) {
-    delete process.env.EXPO_PUBLIC_OMDB_API_KEY;
-  } else {
-    process.env.EXPO_PUBLIC_OMDB_API_KEY = originalKey;
-  }
 });
 
 describe('media query keys', () => {
@@ -313,13 +307,7 @@ describe('media retries', () => {
 
     [
       'OMDb failure',
-      () =>
-        new Response(
-          JSON.stringify({
-            Response: 'False',
-            Error: 'Invalid API key!',
-          }),
-        ),
+      () => new Response(JSON.stringify(omdbInvalidKeyFailure)),
     ],
 
     [

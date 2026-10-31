@@ -9,28 +9,25 @@ import {
 
 import { MEDIA_ERROR_MESSAGES } from '../constants/mediaErrorMessages';
 import { createAbortError } from '../test-utils/createAbortError';
+import { omdbFailure } from '../test-utils/omdbFixtures';
+import {
+  setupOmdbTestEnvironment,
+  TEST_OMDB_API_KEY,
+} from '../test-utils/omdbTestEnvironment';
+import { UNEXPECTED_FETCH_MESSAGE } from '../test-utils/testMessages';
 
 import { OmdbRequestError, requestOmdb } from './omdbClient';
 
-const originalKey = process.env.EXPO_PUBLIC_OMDB_API_KEY;
-const testKey = 'test-key-not-a-real-credential';
+setupOmdbTestEnvironment();
 
 beforeEach(() => {
   jest
     .spyOn(globalThis, 'fetch')
-    .mockRejectedValue(
-      new Error('Unexpected Fetch request in test.'),
-    );
-  process.env.EXPO_PUBLIC_OMDB_API_KEY = testKey;
+    .mockRejectedValue(new Error(UNEXPECTED_FETCH_MESSAGE));
 });
 
 afterEach(() => {
   jest.restoreAllMocks();
-  if (originalKey === undefined) {
-    delete process.env.EXPO_PUBLIC_OMDB_API_KEY;
-  } else {
-    process.env.EXPO_PUBLIC_OMDB_API_KEY = originalKey;
-  }
 });
 
 describe('OMDb transport', () => {
@@ -57,7 +54,7 @@ describe('OMDb transport', () => {
 
     expect(url.origin).toBe('https://www.omdbapi.com');
     expect(url.searchParams.get('s')).toBe('A & B? #映画');
-    expect(url.searchParams.get('apikey')).toBe(testKey);
+    expect(url.searchParams.get('apikey')).toBe(TEST_OMDB_API_KEY);
     expect(url.searchParams.get('r')).toBe('json');
     expect(url.searchParams.has('type')).toBe(false);
     expect(init?.signal).toBe(signal);
@@ -112,7 +109,7 @@ describe('OMDb transport', () => {
       .spyOn(globalThis, 'fetch')
       .mockRejectedValue(
         new TypeError(
-          `Failed URL https://www.omdbapi.com/?apikey=${testKey}`,
+          `Failed URL https://www.omdbapi.com/?apikey=${TEST_OMDB_API_KEY}`,
         ),
       );
 
@@ -148,14 +145,12 @@ describe('OMDb transport', () => {
   });
 
   it('leaves OMDb application failures for response validation/mapping', async () => {
-    const body = { Response: 'False', Error: 'Movie not found!' };
-
     jest
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response(JSON.stringify(body)));
+      .mockResolvedValue(new Response(JSON.stringify(omdbFailure)));
 
     await expect(requestOmdb({ s: 'missing' })).resolves.toEqual(
-      body,
+      omdbFailure,
     );
   });
 });
