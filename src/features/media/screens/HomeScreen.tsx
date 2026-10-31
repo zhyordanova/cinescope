@@ -18,6 +18,8 @@ import { MEDIA_COLLECTIONS } from '../constants/mediaCollections';
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
 import type { MediaCollection } from '../types/mediaCollection.types';
 
+export const CINESCOPE_LOGO = require('../../../../assets/cinescope-logo.png');
+
 function SectionSeparator() {
   return <View style={styles.separator} />;
 }
@@ -52,7 +54,7 @@ export default function HomeScreen() {
                   accessibilityLabel={
                     MEDIA_UI_MESSAGES.home.logoAccessibleLabel
                   }
-                  source={require('../../../../assets/cinescope-logo.png')}
+                  source={CINESCOPE_LOGO}
                   contentFit="contain"
                   style={[
                     styles.logo,

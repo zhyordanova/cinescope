@@ -132,7 +132,7 @@ describe('HomeScreen', () => {
       contentFit: 'contain',
       source: require('../../../../assets/cinescope-logo.png'),
     });
-    
+
     expect(screen.getByTestId('cinematic-banner')).toBeTruthy();
 
     expect(screen.getByText('Inception')).toBeTruthy();
