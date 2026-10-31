@@ -23,11 +23,14 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerTransparent: false }}>
           <Stack.Screen
             name="index"
-            options={{ title: 'CineScope' }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="media/[id]"
-            options={{ title: 'Media Details' }}
+            options={{
+              title: 'Media Details',
+              headerBackButtonDisplayMode: 'minimal',
+            }}
           />
         </Stack>
       </QueryProvider>
