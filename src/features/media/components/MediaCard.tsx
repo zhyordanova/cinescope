@@ -1,10 +1,17 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Colors, Radii, Sizing, Spacing } from '@/constants/theme';
+import {
+  Breakpoints,
+  Colors,
+  Radii,
+  Sizing,
+  Spacing,
+} from '@/constants/theme';
+import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
 import {
   MEDIA_TYPE_LABELS,
@@ -16,6 +23,17 @@ type MediaCardProps = {
   media: MediaSummary;
   onPress: () => void;
 };
+
+export function getMediaCardWidth(width: number) {
+  if (width < Breakpoints.tablet) {
+    return Math.max(
+      120,
+      Math.min(160, Math.round((width - 32) * 0.4)),
+    );
+  }
+
+  return width < Breakpoints.desktop ? 176 : 190;
+}
 
 function Poster({
   url,
@@ -66,9 +84,23 @@ function Poster({
 
 export function MediaCard({ media, onPress }: MediaCardProps) {
   const typeLabel = MEDIA_TYPE_LABELS[media.type];
+  const width = useResponsiveWidth();
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+  const webInteractionProps =
+    Platform.OS === 'web'
+      ? {
+          onHoverIn: () => setHovered(true),
+          onHoverOut: () => setHovered(false),
+          onFocus: () => setFocused(true),
+          onBlur: () => setFocused(false),
+        }
+      : {};
 
   return (
     <Pressable
+      testID="media-card"
       accessibilityRole="button"
       accessibilityLabel={MEDIA_UI_MESSAGES.openMedia(
         media.title,
@@ -78,9 +110,19 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
+        { width: getMediaCardWidth(width) },
+        hovered && styles.hovered,
         pressed && styles.pressed,
       ]}
+      {...webInteractionProps}
     >
+      {focused && (
+        <View
+          testID="media-card-focus-ring"
+          pointerEvents="none"
+          style={styles.focusRing}
+        />
+      )}
       <Poster
         key={`${media.id}:${media.posterUrl}`}
         url={media.posterUrl}
@@ -100,10 +142,23 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    width: Sizing.mediaCardWidth,
+    position: 'relative',
     maxWidth: '100%',
     gap: Spacing.xs,
     minHeight: Sizing.touchTarget,
+  },
+  hovered: {
+    opacity: 0.9,
+  },
+  focusRing: {
+    position: 'absolute',
+    top: -Spacing.xs,
+    right: -Spacing.xs,
+    bottom: -Spacing.xs,
+    left: -Spacing.xs,
+    borderWidth: 2,
+    borderColor: Colors.accent,
+    borderRadius: Radii.surface,
   },
   poster: {
     width: '100%',
@@ -121,7 +176,7 @@ const styles = StyleSheet.create({
   typeBadge: {
     position: 'absolute',
     top: Spacing.sm,
-    left: Spacing.sm,
+    right: Spacing.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: Radii.poster / 2,

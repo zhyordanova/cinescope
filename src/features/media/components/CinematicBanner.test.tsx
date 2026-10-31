@@ -70,7 +70,7 @@ describe('CinematicBanner', () => {
     expect(
       StyleSheet.flatten(webBanner.props.style).justifyContent,
     ).toBe('flex-start');
-    
+
     expect(
       webRender.getByTestId('cinematic-banner-artwork', {
         includeHiddenElements: true,

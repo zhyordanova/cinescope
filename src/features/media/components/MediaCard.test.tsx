@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import {
   cleanup,
   fireEvent,
   render,
   screen,
 } from '@testing-library/react-native/pure';
-import { Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 
 import {
   MEDIA_TYPE_LABELS,
@@ -17,7 +17,7 @@ import {
   seriesSummary,
 } from '../test-utils/mediaFixtures';
 
-import { MediaCard } from './MediaCard';
+import { getMediaCardWidth, MediaCard } from './MediaCard';
 
 jest.mock('@/global.css', () => ({}));
 jest.mock('expo-image', () => ({
@@ -31,6 +31,44 @@ afterEach(async () => {
 });
 
 describe('MediaCard', () => {
+  it('shows hover and keyboard-focus feedback on web', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    await render(
+      <MediaCard media={movieSummary} onPress={jest.fn()} />,
+    );
+
+    const card = screen.getByTestId('media-card');
+
+    await fireEvent(card, 'hoverIn');
+
+    const hoveredCard = screen.getByTestId('media-card');
+
+    expect(StyleSheet.flatten(hoveredCard.props.style).opacity).toBe(
+      0.9,
+    );
+
+    await fireEvent(card, 'focus');
+
+    const focusRing = screen.getByTestId('media-card-focus-ring');
+
+    expect(StyleSheet.flatten(focusRing.props.style)).toMatchObject({
+      borderColor: Colors.accent,
+      borderWidth: 2,
+    });
+
+    await fireEvent(card, 'blur');
+
+    expect(screen.queryByTestId('media-card-focus-ring')).toBeNull();
+  });
+
+  it('adapts card width for mobile, tablet, and desktop layouts', () => {
+    expect(getMediaCardWidth(320)).toBe(120);
+    expect(getMediaCardWidth(390)).toBe(143);
+    expect(getMediaCardWidth(599)).toBe(160);
+    expect(getMediaCardWidth(600)).toBe(176);
+    expect(getMediaCardWidth(1024)).toBe(190);
+  });
+
   it.each([
     { media: movieSummary, label: MEDIA_TYPE_LABELS.movie },
     { media: seriesSummary, label: MEDIA_TYPE_LABELS.series },
@@ -44,11 +82,13 @@ describe('MediaCard', () => {
       expect(screen.getByText(media.year!)).toBeTruthy();
 
       const badge = screen.getByTestId('media-type-badge');
+
       expect(badge.props.pointerEvents).toBe('none');
+
       expect(StyleSheet.flatten(badge.props.style)).toMatchObject({
         position: 'absolute',
         top: Spacing.sm,
-        left: Spacing.sm,
+        right: Spacing.sm,
       });
 
       expect(

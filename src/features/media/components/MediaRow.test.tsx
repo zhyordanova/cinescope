@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { FlatList, Platform } from 'react-native';
+import { FlatList, Platform, StyleSheet } from 'react-native';
 import {
   cleanup,
   fireEvent,
@@ -11,6 +11,7 @@ import {
   MEDIA_TYPE_LABELS,
   MEDIA_UI_MESSAGES,
 } from '../constants/mediaUiMessages';
+import { Colors } from '@/constants/theme';
 import {
   movieSummary,
   seriesSummary,
@@ -155,6 +156,59 @@ describe('MediaRow web controls', () => {
     expect(scrollToOffset).toHaveBeenLastCalledWith({
       offset: 200,
       animated: true,
+    });
+  });
+
+  it('uses Midnight Teal arrow styling and applies web hover feedback', async () => {
+    const list = await renderWebRow();
+
+    const nextButton = screen.getByRole('button', {
+      name: MEDIA_UI_MESSAGES.nextTitles(collectionTitle),
+    });
+
+    const control = screen.getByTestId('media-row-next-control');
+
+    expect(
+      StyleSheet.flatten(control.props.style).backgroundColor,
+    ).toBe(Colors.surfaceElevated);
+
+    await fireEvent(nextButton, 'hoverIn');
+
+    expect(StyleSheet.flatten(control.props.style)).toMatchObject({
+      backgroundColor: Colors.accent,
+      borderColor: Colors.accent,
+    });
+
+    await fireEvent(nextButton, 'hoverOut');
+
+    expect(
+      StyleSheet.flatten(control.props.style).backgroundColor,
+    ).toBe(Colors.surfaceElevated);
+
+    expect(list).toBeTruthy();
+  });
+
+  it('shows a visible focus treatment on web arrow controls', async () => {
+    await renderWebRow();
+
+    const nextButton = screen.getByRole('button', {
+      name: MEDIA_UI_MESSAGES.nextTitles(collectionTitle),
+    });
+    
+    const control = screen.getByTestId('media-row-next-control');
+
+    await fireEvent(nextButton, 'focus');
+
+    expect(StyleSheet.flatten(control.props.style)).toMatchObject({
+      borderColor: Colors.accent,
+      borderWidth: 2,
+    });
+
+    await fireEvent(nextButton, 'blur');
+
+    expect(StyleSheet.flatten(control.props.style)).toMatchObject({
+      borderColor: Colors.border,
+      borderWidth: 1,
     });
   });
 

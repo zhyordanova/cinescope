@@ -18,7 +18,7 @@ describe('RootLayout screen headers', () => {
     const stack = Children.only(
       queryProvider.props.children,
     ) as ReactElement<{ children: ReactNode }>;
-    
+
     const screens = Children.toArray(
       stack.props.children,
     ) as ReactElement<{

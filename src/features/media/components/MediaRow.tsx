@@ -5,6 +5,7 @@ import {
   Pressable,
   StyleSheet,
   View,
+  type FlatListProps,
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -26,8 +27,63 @@ type MediaRowProps = {
   onMediaPress: (id: string) => void;
 };
 
+type ArrowControlProps = {
+  direction: 'previous' | 'next';
+  title: string;
+  disabled: boolean;
+  onPress: () => void;
+};
+
 function CardSeparator() {
   return <View style={styles.separator} />;
+}
+
+function ArrowControl({
+  direction,
+  title,
+  disabled,
+  onPress,
+}: ArrowControlProps) {
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const isWeb = Platform.OS === 'web';
+  const isPrevious = direction === 'previous';
+  const label = isPrevious
+    ? MEDIA_UI_MESSAGES.previousTitles(title)
+    : MEDIA_UI_MESSAGES.nextTitles(title);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      onHoverIn={isWeb ? () => setHovered(true) : undefined}
+      onHoverOut={isWeb ? () => setHovered(false) : undefined}
+      onFocus={isWeb ? () => setFocused(true) : undefined}
+      onBlur={isWeb ? () => setFocused(false) : undefined}
+      style={({ pressed }) => [
+        styles.arrow,
+        isPrevious ? styles.previous : styles.next,
+        disabled && styles.dimmed,
+        pressed && styles.controlPressed,
+      ]}
+    >
+      <View
+        testID={`media-row-${direction}-control`}
+        style={[
+          styles.control,
+          hovered && styles.controlHovered,
+          focused && styles.controlFocused,
+        ]}
+      >
+        <ThemedText accessible={false} style={styles.chevron}>
+          {isPrevious ? '<' : '>'}
+        </ThemedText>
+      </View>
+    </Pressable>
+  );
 }
 
 export function MediaRow({
@@ -40,6 +96,24 @@ export function MediaRow({
   const [contentWidth, setContentWidth] = useState(0);
   const [offset, setOffset] = useState(0);
   const isWeb = Platform.OS === 'web';
+
+  const webListEventProps: Pick<
+    FlatListProps<MediaSummary>,
+    | 'onLayout'
+    | 'onContentSizeChange'
+    | 'onScroll'
+    | 'scrollEventThrottle'
+  > = isWeb
+    ? {
+        onLayout: (event) =>
+          setViewportWidth(event.nativeEvent.layout.width),
+        onContentSizeChange: (width) => setContentWidth(width),
+        onScroll: (event) =>
+          setOffset(event.nativeEvent.contentOffset.x),
+        scrollEventThrottle: 16,
+      }
+    : {};
+
   const maxOffset = Math.max(0, contentWidth - viewportWidth);
   const showControls = isWeb && viewportWidth > 0 && maxOffset > 1;
   const atStart = offset <= 1;
@@ -72,22 +146,7 @@ export function MediaRow({
           contentContainerStyle={styles.content}
           ItemSeparatorComponent={CardSeparator}
           showsHorizontalScrollIndicator={false}
-          onLayout={
-            isWeb
-              ? (event) =>
-                  setViewportWidth(event.nativeEvent.layout.width)
-              : undefined
-          }
-          onContentSizeChange={
-            isWeb ? (width) => setContentWidth(width) : undefined
-          }
-          onScroll={
-            isWeb
-              ? (event) =>
-                  setOffset(event.nativeEvent.contentOffset.x)
-              : undefined
-          }
-          scrollEventThrottle={isWeb ? 16 : undefined}
+          {...webListEventProps}
           renderItem={({ item }) => (
             <MediaCard
               media={item}
@@ -97,44 +156,18 @@ export function MediaRow({
         />
         {showControls && (
           <>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={MEDIA_UI_MESSAGES.previousTitles(
-                title,
-              )}
-              accessibilityState={{ disabled: atStart }}
+            <ArrowControl
+              direction="previous"
+              title={title}
               disabled={atStart}
               onPress={() => scroll(-1)}
-              style={({ pressed }) => [
-                styles.arrow,
-                styles.previous,
-                (atStart || pressed) && styles.dimmed,
-              ]}
-            >
-              <View style={styles.control}>
-                <ThemedText accessible={false} style={styles.chevron}>
-                  {'<'}
-                </ThemedText>
-              </View>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={MEDIA_UI_MESSAGES.nextTitles(title)}
-              accessibilityState={{ disabled: atEnd }}
+            />
+            <ArrowControl
+              direction="next"
+              title={title}
               disabled={atEnd}
               onPress={() => scroll(1)}
-              style={({ pressed }) => [
-                styles.arrow,
-                styles.next,
-                (atEnd || pressed) && styles.dimmed,
-              ]}
-            >
-              <View style={styles.control}>
-                <ThemedText accessible={false} style={styles.chevron}>
-                  {'>'}
-                </ThemedText>
-              </View>
-            </Pressable>
+            />
           </>
         )}
       </View>
@@ -174,7 +207,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: Sizing.touchTarget / 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  controlHovered: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  controlFocused: {
+    borderWidth: 2,
+    borderColor: Colors.accent,
+  },
+  controlPressed: {
+    opacity: 0.8,
   },
   chevron: {
     color: Colors.textPrimary,
