@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Radii, Sizing, Spacing } from '@/constants/theme';
+import { Colors, Radii, Sizing, Spacing } from '@/constants/theme';
 
 import {
   MEDIA_TYPE_LABELS,
@@ -17,7 +17,13 @@ type MediaCardProps = {
   onPress: () => void;
 };
 
-function Poster({ url }: { url: string | null }) {
+function Poster({
+  url,
+  typeLabel,
+}: {
+  url: string | null;
+  typeLabel: string;
+}) {
   const [failed, setFailed] = useState(false);
 
   return (
@@ -41,6 +47,19 @@ function Poster({ url }: { url: string | null }) {
           {MEDIA_UI_MESSAGES.posterUnavailable}
         </ThemedText>
       )}
+      <View
+        testID="media-type-badge"
+        pointerEvents="none"
+        style={styles.typeBadge}
+      >
+        <ThemedText
+          type="smallBold"
+          themeColor="textPrimary"
+          style={styles.typeBadgeText}
+        >
+          {typeLabel}
+        </ThemedText>
+      </View>
     </ThemedView>
   );
 }
@@ -65,10 +84,8 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
       <Poster
         key={`${media.id}:${media.posterUrl}`}
         url={media.posterUrl}
+        typeLabel={typeLabel}
       />
-      <ThemedText type="smallBold" themeColor="textSecondary">
-        {typeLabel}
-      </ThemedText>
       <ThemedText type="smallBold" numberOfLines={2}>
         {media.title}
       </ThemedText>
@@ -100,6 +117,18 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+  },
+  typeBadge: {
+    position: 'absolute',
+    top: Spacing.sm,
+    left: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radii.poster / 2,
+    backgroundColor: 'rgba(11, 15, 25, 0.78)',
+  },
+  typeBadgeText: {
+    color: Colors.textPrimary,
   },
   fallback: {
     textAlign: 'center',

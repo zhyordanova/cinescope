@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
+import { StyleSheet } from 'react-native';
 import {
   cleanup,
   fireEvent,
   render,
   screen,
 } from '@testing-library/react-native/pure';
+import { Spacing } from '@/constants/theme';
 
 import {
   MEDIA_TYPE_LABELS,
@@ -40,6 +42,14 @@ describe('MediaCard', () => {
       expect(screen.getByText(media.title)).toBeTruthy();
       expect(screen.getByText(label)).toBeTruthy();
       expect(screen.getByText(media.year!)).toBeTruthy();
+
+      const badge = screen.getByTestId('media-type-badge');
+      expect(badge.props.pointerEvents).toBe('none');
+      expect(StyleSheet.flatten(badge.props.style)).toMatchObject({
+        position: 'absolute',
+        top: Spacing.sm,
+        left: Spacing.sm,
+      });
 
       expect(
         screen.getByRole('button', {
