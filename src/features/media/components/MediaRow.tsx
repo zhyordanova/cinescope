@@ -8,7 +8,12 @@ import {
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import {
+  Colors,
+  Sizing,
+  Spacing,
+  Typography,
+} from '@/constants/theme';
 
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
 import type { MediaSummary } from '../types/media.types';
@@ -139,18 +144,18 @@ export function MediaRow({
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.two,
+    gap: Spacing.sm,
   },
   heading: {
-    fontWeight: '700',
+    fontWeight: Typography.fontWeights.bold,
     flex: 1,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.three,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
   },
   arrow: {
     position: 'absolute',
@@ -164,26 +169,26 @@ const styles = StyleSheet.create({
     right: 0,
   },
   control: {
-    width: 48,
-    height: 48,
+    width: Sizing.touchTarget,
+    height: Sizing.touchTarget,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 24,
+    borderRadius: Sizing.touchTarget / 2,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   chevron: {
-    color: '#ffffff',
+    color: Colors.textPrimary,
     fontSize: 28,
     lineHeight: 36,
-    fontWeight: '700',
+    fontWeight: Typography.fontWeights.bold,
   },
   dimmed: {
     opacity: 0.5,
   },
   content: {
-    paddingHorizontal: Spacing.three,
+    paddingHorizontal: Spacing.lg,
   },
   separator: {
-    width: Spacing.two,
+    width: Spacing.sm,
   },
 });

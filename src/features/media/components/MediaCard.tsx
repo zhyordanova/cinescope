@@ -4,7 +4,7 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Radii, Sizing, Spacing } from '@/constants/theme';
 
 import {
   MEDIA_TYPE_LABELS,
@@ -21,7 +21,7 @@ function Poster({ url }: { url: string | null }) {
   const [failed, setFailed] = useState(false);
 
   return (
-    <ThemedView type="backgroundElement" style={styles.poster}>
+    <ThemedView type="surface" style={styles.poster}>
       {url && !failed ? (
         <Image
           testID="media-poster"
@@ -83,19 +83,19 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    width: 144,
+    width: Sizing.mediaCardWidth,
     maxWidth: '100%',
-    gap: Spacing.one,
-    minHeight: 48,
+    gap: Spacing.xs,
+    minHeight: Sizing.touchTarget,
   },
   poster: {
     width: '100%',
-    aspectRatio: 2 / 3,
-    borderRadius: Spacing.two,
+    aspectRatio: Sizing.posterAspectRatio,
+    borderRadius: Radii.poster,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.one,
+    marginBottom: Spacing.xs,
   },
   image: {
     width: '100%',
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   fallback: {
     textAlign: 'center',
-    padding: Spacing.two,
+    padding: Spacing.sm,
   },
   pressed: {
     opacity: 0.7,

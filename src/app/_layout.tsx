@@ -1,16 +1,22 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  Stack,
-  ThemeProvider,
-} from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 
+import { Colors } from '@/constants/theme';
 import { QueryProvider } from '@/providers/QueryProvider';
 
+const theme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: Colors.accent,
+    background: Colors.background,
+    card: Colors.surface,
+    text: Colors.textPrimary,
+    border: Colors.border,
+    notification: Colors.error,
+  },
+};
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
   return (
     <ThemeProvider value={theme}>
       <QueryProvider>
