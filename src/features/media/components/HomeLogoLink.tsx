@@ -12,7 +12,7 @@ export function HomeLogoLink({ width }: { width: number }) {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <Link href="/" replace asChild>
+    <Link href="/" dismissTo asChild>
       <Pressable
         accessibilityRole="link"
         accessibilityLabel={MEDIA_UI_MESSAGES.details.goHome}
