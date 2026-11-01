@@ -1,6 +1,8 @@
 import { MEDIA_ERROR_MESSAGES } from '../constants/mediaErrorMessages';
 import type {
   MediaDetails,
+  MediaRating,
+  MediaRatingSource,
   MediaSearchResult,
   MediaSummary,
 } from '../types/media.types';
@@ -8,9 +10,16 @@ import type {
   OmdbDetailsResponse,
   OmdbFailureResponse,
   OmdbMediaSummary,
+  OmdbRating,
   OmdbSearchResponse,
 } from '../types/omdb.types';
 import { isValidMediaId } from '../utils/isValidMediaId';
+
+const RATING_SOURCE_LABELS: Record<string, MediaRatingSource> = {
+  'Internet Movie Database': 'IMDb',
+  'Rotten Tomatoes': 'Rotten Tomatoes',
+  Metacritic: 'Metacritic',
+};
 
 export class OmdbResponseError extends Error {
   constructor(
@@ -55,6 +64,21 @@ function text(value: unknown): string | null {
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined;
+}
+
+function parseRatings(value: unknown): OmdbRating[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item: unknown) => {
+    if (!isRecord(item)) return [];
+
+    const source = text(item.Source);
+    const ratingValue = text(item.Value);
+
+    return source && ratingValue
+      ? [{ Source: source, Value: ratingValue }]
+      : [];
+  });
 }
 
 function parseFailure(
@@ -137,8 +161,17 @@ export function parseOmdbDetailsResponse(
     Plot: optionalString(response.Plot),
     Genre: optionalString(response.Genre),
     Runtime: optionalString(response.Runtime),
-    imdbRating: optionalString(response.imdbRating),
     totalSeasons: optionalString(response.totalSeasons),
+    Director: optionalString(response.Director),
+    Writer: optionalString(response.Writer),
+    Actors: optionalString(response.Actors),
+    Released: optionalString(response.Released),
+    Rated: optionalString(response.Rated),
+    Country: optionalString(response.Country),
+    Language: optionalString(response.Language),
+    Awards: optionalString(response.Awards),
+    Ratings: parseRatings(response.Ratings),
+    BoxOffice: optionalString(response.BoxOffice),
   };
 }
 
@@ -187,6 +220,19 @@ function positiveInteger(value: string | null): number | null {
   return Number.isSafeInteger(number) && number > 0 ? number : null;
 }
 
+function mapRatings(ratings: OmdbRating[]): MediaRating[] {
+  const seenSources = new Set<MediaRatingSource>();
+
+  return ratings.flatMap(({ Source, Value }) => {
+    const source = RATING_SOURCE_LABELS[Source];
+
+    if (!source || seenSources.has(source)) return [];
+
+    seenSources.add(source);
+    return [{ source, value: Value }];
+  });
+}
+
 export function mapOmdbSearchResponse(
   value: unknown,
 ): MediaSearchResult {
@@ -210,12 +256,6 @@ export function mapOmdbDetailsResponse(value: unknown): MediaDetails {
   }
 
   const runtime = text(response.Runtime)?.match(/^(\d+) min$/);
-  const ratingText = text(response.imdbRating);
-
-  const rating =
-    ratingText && /^\d+(?:\.\d+)?$/.test(ratingText)
-      ? Number(ratingText)
-      : null;
   return {
     ...mapSummary(response),
     plot: text(response.Plot),
@@ -225,11 +265,19 @@ export function mapOmdbDetailsResponse(value: unknown): MediaDetails {
         .map((genre) => genre.trim())
         .filter((genre) => genre && genre !== 'N/A') ?? [],
     runtimeMinutes: positiveInteger(runtime?.[1] ?? null),
-    imdbRating:
-      rating !== null && rating >= 0 && rating <= 10 ? rating : null,
+    ratings: mapRatings(response.Ratings),
     totalSeasons:
       response.Type === 'series'
         ? positiveInteger(text(response.totalSeasons))
         : null,
+    director: text(response.Director),
+    writer: text(response.Writer),
+    actors: text(response.Actors),
+    released: text(response.Released),
+    rated: text(response.Rated),
+    country: text(response.Country),
+    language: text(response.Language),
+    awards: text(response.Awards),
+    boxOffice: text(response.BoxOffice),
   };
 }

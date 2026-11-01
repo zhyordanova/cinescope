@@ -12,9 +12,26 @@ export type MediaDetails = MediaSummary & {
   plot: string | null;
   genres: string[];
   runtimeMinutes: number | null;
-  imdbRating: number | null;
+  ratings: MediaRating[];
   totalSeasons: number | null;
+  director: string | null;
+  writer: string | null;
+  actors: string | null;
+  released: string | null;
+  rated: string | null;
+  country: string | null;
+  language: string | null;
+  awards: string | null;
+  boxOffice: string | null;
 };
+
+export type MediaRating = {
+  source: MediaRatingSource;
+  value: string;
+};
+
+export type MediaRatingSource =
+  'IMDb' | 'Rotten Tomatoes' | 'Metacritic';
 
 export type MediaSearchResult = {
   items: MediaSummary[];

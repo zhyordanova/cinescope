@@ -1,4 +1,5 @@
 import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { Platform } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -28,7 +29,8 @@ export default function RootLayout() {
           <Stack.Screen
             name="media/[id]"
             options={{
-              title: 'Media Details',
+              title: '',
+              headerShown: Platform.OS !== 'web',
               headerBackButtonDisplayMode: 'minimal',
             }}
           />
