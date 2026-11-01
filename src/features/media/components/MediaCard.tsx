@@ -13,11 +13,10 @@ import {
 } from '@/constants/theme';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
-import {
-  MEDIA_TYPE_LABELS,
-  MEDIA_UI_MESSAGES,
-} from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
 import type { MediaSummary } from '../types/media.types';
+
+import { MediaTypeBadge } from './MediaTypeBadge';
 
 type MediaCardProps = {
   media: MediaSummary;
@@ -37,10 +36,10 @@ export function getMediaCardWidth(width: number) {
 
 function Poster({
   url,
-  typeLabel,
+  mediaType,
 }: {
   url: string | null;
-  typeLabel: string;
+  mediaType: MediaSummary['type'];
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -65,25 +64,12 @@ function Poster({
           {MEDIA_UI_MESSAGES.posterUnavailable}
         </ThemedText>
       )}
-      <View
-        testID="media-type-badge"
-        pointerEvents="none"
-        style={styles.typeBadge}
-      >
-        <ThemedText
-          type="smallBold"
-          themeColor="textPrimary"
-          style={styles.typeBadgeText}
-        >
-          {typeLabel}
-        </ThemedText>
-      </View>
+      <MediaTypeBadge mediaType={mediaType} variant="poster" />
     </ThemedView>
   );
 }
 
 export function MediaCard({ media, onPress }: MediaCardProps) {
-  const typeLabel = MEDIA_TYPE_LABELS[media.type];
   const width = useResponsiveWidth();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -126,7 +112,7 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
       <Poster
         key={`${media.id}:${media.posterUrl}`}
         url={media.posterUrl}
-        typeLabel={typeLabel}
+        mediaType={media.type}
       />
       <ThemedText type="smallBold" numberOfLines={2}>
         {media.title}
@@ -172,18 +158,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-  },
-  typeBadge: {
-    position: 'absolute',
-    top: Spacing.sm,
-    right: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radii.poster / 2,
-    backgroundColor: 'rgba(11, 15, 25, 0.78)',
-  },
-  typeBadgeText: {
-    color: Colors.textPrimary,
   },
   fallback: {
     textAlign: 'center',

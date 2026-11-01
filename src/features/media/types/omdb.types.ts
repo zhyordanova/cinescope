@@ -8,6 +8,11 @@ export type OmdbMediaSummary = {
   Poster?: string;
 };
 
+export type OmdbRating = {
+  Source: string;
+  Value: string;
+};
+
 export type OmdbFailureResponse = {
   Response: 'False';
   Error: string;
@@ -27,7 +32,16 @@ export type OmdbDetailsResponse =
       Plot?: string;
       Genre?: string;
       Runtime?: string;
-      imdbRating?: string;
       totalSeasons?: string;
+      Director?: string;
+      Writer?: string;
+      Actors?: string;
+      Released?: string;
+      Rated?: string;
+      Country?: string;
+      Language?: string;
+      Awards?: string;
+      Ratings: OmdbRating[];
+      BoxOffice?: string;
     })
   | OmdbFailureResponse;

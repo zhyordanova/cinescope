@@ -3,6 +3,7 @@ import { describe, expect, it } from '@jest/globals';
 import {
   omdbFailure,
   omdbInvalidKeyFailure,
+  omdbMovieDetails,
 } from '../test-utils/omdbFixtures';
 
 import {
@@ -22,12 +23,8 @@ const summary = {
 };
 
 const details = {
-  ...summary,
-  Response: 'True',
+  ...omdbMovieDetails,
   Plot: ' A programmer discovers a simulated reality. ',
-  Genre: 'Action, Sci-Fi',
-  Runtime: '136 min',
-  imdbRating: '8.7',
 };
 
 function search(item: unknown = summary) {
@@ -261,9 +258,75 @@ describe('domain mapping', () => {
       plot: 'A programmer discovers a simulated reality.',
       genres: ['Action', 'Sci-Fi'],
       runtimeMinutes: 136,
-      imdbRating: 8.7,
+      ratings: [
+        { source: 'IMDb', value: '8.7/10' },
+        { source: 'Rotten Tomatoes', value: '88%' },
+        { source: 'Metacritic', value: '73/100' },
+      ],
       totalSeasons: null,
+      director: 'Lana Wachowski, Lilly Wachowski',
+      writer: 'Lana Wachowski, Lilly Wachowski',
+      actors: 'Keanu Reeves, Laurence Fishburne, Carrie-Anne Moss',
+      released: '31 March 1999',
+      rated: 'R',
+      country: 'United States',
+      language: 'English',
+      awards: 'Won 4 Oscars. 42 wins & 51 nominations total',
+      boxOffice: '$171,479,930',
     });
+  });
+
+  it('maps supported Ratings entries and ignores unsupported score fields', () => {
+    const mapped = mapOmdbDetailsResponse({
+      ...details,
+      Ratings: [
+        { Source: 'Rotten Tomatoes', Value: '88%' },
+        { Source: 'Unknown Source', Value: '80' },
+      ],
+      Metascore: '73',
+      imdbRating: '8.7',
+    });
+
+    expect(mapped.ratings).toEqual([
+      { source: 'Rotten Tomatoes', value: '88%' },
+    ]);
+  });
+
+  it.each(['toString', 'constructor', '__proto__'])(
+    'ignores inherited rating source properties: %s',
+    (Source) => {
+      expect(
+        mapOmdbDetailsResponse({
+          ...details,
+          Ratings: [
+            { Source, Value: '99%' },
+            { Source: 'Rotten Tomatoes', Value: '88%' },
+          ],
+        }).ratings,
+      ).toEqual([{ source: 'Rotten Tomatoes', value: '88%' }]);
+    },
+  );
+
+  it('preserves the IMDb value from Ratings as provided', () => {
+    expect(
+      mapOmdbDetailsResponse({
+        ...details,
+        Ratings: [
+          { Source: 'Internet Movie Database', Value: '7.5/10' },
+        ],
+      }).ratings,
+    ).toEqual([{ source: 'IMDb', value: '7.5/10' }]);
+  });
+
+  it('does not create ratings from imdbRating or Metascore alone', () => {
+    expect(
+      mapOmdbDetailsResponse({
+        ...details,
+        imdbRating: '8.7',
+        Metascore: '73',
+        Ratings: [],
+      }).ratings,
+    ).toEqual([]);
   });
 
   it('maps series season counts and preserves its year range', () => {
@@ -309,13 +372,32 @@ describe('domain mapping', () => {
           Runtime: value,
           imdbRating: value,
           totalSeasons: value,
+          Director: value,
+          Writer: value,
+          Actors: value,
+          Released: value,
+          Rated: value,
+          Country: value,
+          Language: value,
+          Awards: value,
+          Ratings: value,
+          BoxOffice: value,
         }),
       ).toMatchObject({
         plot: null,
         genres: [],
         runtimeMinutes: null,
-        imdbRating: null,
         totalSeasons: null,
+        director: null,
+        writer: null,
+        actors: null,
+        released: null,
+        rated: null,
+        country: null,
+        language: null,
+        awards: null,
+        ratings: [],
+        boxOffice: null,
       });
     },
   );
@@ -331,15 +413,6 @@ describe('domain mapping', () => {
       mapOmdbDetailsResponse({ ...details, Runtime }).runtimeMinutes,
     ).toBeNull();
   });
-
-  it.each(['-1', '11', '8.7/10', 'Infinity', '0x8'])(
-    'rejects invalid ratings: %s',
-    (imdbRating) => {
-      expect(
-        mapOmdbDetailsResponse({ ...details, imdbRating }).imdbRating,
-      ).toBeNull();
-    },
-  );
 
   it.each(['0', '-1', '1.5', 'five', '9007199254740992'])(
     'rejects invalid season counts: %s',

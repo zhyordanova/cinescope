@@ -8,6 +8,7 @@ export const Colors = {
   surfaceElevated: '#202A3B',
   accent: '#00BFA6',
   accentPressed: '#009B88',
+  ratingStar: '#F6BA54',
   textPrimary: '#F4F6FA',
   textSecondary: '#9DAABD',
   border: '#303A4D',

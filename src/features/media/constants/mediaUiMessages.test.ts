@@ -74,28 +74,14 @@ describe('media UI messages', () => {
     ).toBe('Retrying Holiday Magic…');
   });
 
-  it('formats Details metadata, including units and genre separators', () => {
-    expect(MEDIA_UI_MESSAGES.details.imdbId('tt0133093')).toBe(
-      'IMDb ID: tt0133093',
+  it('formats Details metadata, including units', () => {
+    expect(MEDIA_UI_MESSAGES.details.goHome).toBe(
+      'CineScope — Go to Home',
     );
 
-    expect(MEDIA_UI_MESSAGES.details.year('2022–')).toBe(
-      'Year: 2022–',
-    );
+    expect(MEDIA_UI_MESSAGES.details.year('2022–')).toBe('2022–');
 
-    expect(
-      MEDIA_UI_MESSAGES.details.genres(['Action', 'Sci-Fi']),
-    ).toBe('Genres: Action, Sci-Fi');
-
-    expect(MEDIA_UI_MESSAGES.details.genres([])).toBe('Genres: ');
-
-    expect(MEDIA_UI_MESSAGES.details.runtime(136)).toBe(
-      'Runtime: 136 min',
-    );
-
-    expect(MEDIA_UI_MESSAGES.details.imdbRating(8.7)).toBe(
-      'IMDb rating: 8.7/10',
-    );
+    expect(MEDIA_UI_MESSAGES.details.runtime(136)).toBe('136 min');
 
     expect(MEDIA_UI_MESSAGES.details.seasons(3)).toBe('Seasons: 3');
   });
