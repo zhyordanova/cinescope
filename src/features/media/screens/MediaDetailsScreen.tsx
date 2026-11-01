@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useCanGoBack, useLocalSearchParams } from 'expo-router';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,6 +23,7 @@ import { isValidMediaId } from '../utils/isValidMediaId';
 const DETAILS_MAX_CONTENT_WIDTH = 1080;
 
 export default function MediaDetailsScreen() {
+  const canGoBack = useCanGoBack();
   const { id } = useLocalSearchParams<{
     id?: string | string[];
   }>();
@@ -62,7 +63,9 @@ export default function MediaDetailsScreen() {
             isDesktopWeb && styles.desktopContent,
           ]}
         >
-          {Platform.OS === 'web' && <HomeLogoLink width={width} />}
+          {(Platform.OS === 'web' || !canGoBack) && (
+            <HomeLogoLink width={width} />
+          )}
           {(!media || !isDesktopWeb) && (
             <ThemedText
               testID="details-media-title"

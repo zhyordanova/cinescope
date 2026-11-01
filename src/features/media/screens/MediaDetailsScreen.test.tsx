@@ -20,7 +20,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
+import { useCanGoBack, useLocalSearchParams } from 'expo-router';
 
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 import { Breakpoints, Spacing } from '@/constants/theme';
@@ -39,6 +39,7 @@ import MediaDetailsScreen from './MediaDetailsScreen';
 
 jest.mock('expo-router', () => ({
   ...jest.requireActual<typeof import('expo-router')>('expo-router'),
+  useCanGoBack: jest.fn(),
   useLocalSearchParams: jest.fn(),
 }));
 
@@ -89,6 +90,7 @@ function deferredResponse() {
 }
 
 beforeEach(() => {
+  jest.mocked(useCanGoBack).mockReturnValue(true);
   jest.mocked(useResponsiveWidth).mockReturnValue(390);
 
   jest
@@ -110,6 +112,81 @@ afterEach(async () => {
 });
 
 describe('MediaDetailsScreen', () => {
+  it.each([
+    { platform: 'ios', hasHistory: false },
+    { platform: 'ios', hasHistory: true },
+    { platform: 'android', hasHistory: false },
+    { platform: 'android', hasHistory: true },
+  ] as const)(
+    'shows the native Home fallback only without history on $platform ($hasHistory)',
+    async ({ platform, hasHistory }) => {
+      jest.replaceProperty(Platform, 'OS', platform);
+      jest.mocked(useCanGoBack).mockReturnValue(hasHistory);
+      jest
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(respond(movie));
+
+      await renderDetails();
+      await screen.findByRole('header', { name: movie.Title });
+
+      const homeLink = screen.queryByRole('link', {
+        name: MEDIA_UI_MESSAGES.details.goHome,
+      });
+
+      if (hasHistory) {
+        expect(homeLink).toBeNull();
+      } else {
+        expect(homeLink).not.toBeNull();
+        expect(homeLink?.props.href).toBe('/');
+      }
+    },
+  );
+
+  it.each(['ios', 'android'] as const)(
+    'keeps Home available for an invalid native deep link on %s',
+    async (platform) => {
+      jest.replaceProperty(Platform, 'OS', platform);
+      jest.mocked(useCanGoBack).mockReturnValue(false);
+      jest
+        .mocked(useLocalSearchParams)
+        .mockReturnValue({ id: 'invalid' });
+
+      const fetchMock = jest.spyOn(globalThis, 'fetch');
+
+      await renderDetails();
+
+      expect(screen.getByRole('alert')).toBeTruthy();
+
+      expect(
+        screen.getByRole('link', {
+          name: MEDIA_UI_MESSAGES.details.goHome,
+        }),
+      ).toBeTruthy();
+      
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['ios', 'android'] as const)(
+    'keeps Home available after a native deep-link request fails on %s',
+    async (platform) => {
+      jest.replaceProperty(Platform, 'OS', platform);
+      jest.mocked(useCanGoBack).mockReturnValue(false);
+      jest
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(respond(omdbFailure));
+
+      await renderDetails();
+      await screen.findByRole('alert');
+
+      expect(
+        screen.getByRole('link', {
+          name: MEDIA_UI_MESSAGES.details.goHome,
+        }),
+      ).toBeTruthy();
+    },
+  );
+
   it.each([
     { platform: 'ios', width: 390, direction: 'column' },
     { platform: 'web', width: 800, direction: 'column' },
