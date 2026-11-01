@@ -292,6 +292,21 @@ describe('domain mapping', () => {
     ]);
   });
 
+  it.each(['toString', 'constructor', '__proto__'])(
+    'ignores inherited rating source properties: %s',
+    (Source) => {
+      expect(
+        mapOmdbDetailsResponse({
+          ...details,
+          Ratings: [
+            { Source, Value: '99%' },
+            { Source: 'Rotten Tomatoes', Value: '88%' },
+          ],
+        }).ratings,
+      ).toEqual([{ source: 'Rotten Tomatoes', value: '88%' }]);
+    },
+  );
+
   it('preserves the IMDb value from Ratings as provided', () => {
     expect(
       mapOmdbDetailsResponse({

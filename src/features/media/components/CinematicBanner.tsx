@@ -10,10 +10,8 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
+import { MOBILE_BANNER, WEB_BANNER } from '../constants/mediaAssets';
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-
-const MOBILE_BANNER = require('../../../../assets/CinematicBanner-mobile.png');
-const WEB_BANNER = require('../../../../assets/CinematicBanner-web.png');
 
 export function getCinematicBannerArtwork(width: number) {
   return width < Breakpoints.tablet ? MOBILE_BANNER : WEB_BANNER;

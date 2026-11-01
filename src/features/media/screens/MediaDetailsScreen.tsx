@@ -14,6 +14,7 @@ import { BehindTheStory } from '../components/BehindTheStory';
 import { CriticsRatings } from '../components/CriticsRatings';
 import { DetailsPoster } from '../components/DetailsPoster';
 import { DetailsTextSection } from '../components/DetailsTextSection';
+import { HomeLogoLink } from '../components/HomeLogoLink';
 import { MediaMetadata } from '../components/MediaMetadata';
 import { ProductionDetails } from '../components/ProductionDetails';
 import { useMediaDetails } from '../hooks/useMediaDetails';
@@ -61,6 +62,7 @@ export default function MediaDetailsScreen() {
             isDesktopWeb && styles.desktopContent,
           ]}
         >
+          {Platform.OS === 'web' && <HomeLogoLink width={width} />}
           {(!media || !isDesktopWeb) && (
             <ThemedText
               testID="details-media-title"
@@ -205,7 +207,7 @@ const styles = StyleSheet.create({
   },
   desktopContent: {
     gap: Spacing.xl,
-    paddingTop: Spacing.xxxl,
+    paddingTop: Spacing.lg,
   },
   detailsLayout: {
     width: '100%',

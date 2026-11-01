@@ -30,6 +30,7 @@ export const MEDIA_UI_MESSAGES = {
     errorTitle: 'Unable to load details',
     loadingTitle: 'Loading details',
     loading: 'Loading media details…',
+    goHome: 'CineScope — Go to Home',
     plotUnavailable: 'Plot unavailable.',
     overviewTitle: 'Overview',
     behindTheStoryTitle: 'Behind the Story',

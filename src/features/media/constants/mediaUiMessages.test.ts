@@ -75,6 +75,10 @@ describe('media UI messages', () => {
   });
 
   it('formats Details metadata, including units', () => {
+    expect(MEDIA_UI_MESSAGES.details.goHome).toBe(
+      'CineScope — Go to Home',
+    );
+
     expect(MEDIA_UI_MESSAGES.details.year('2022–')).toBe('2022–');
 
     expect(MEDIA_UI_MESSAGES.details.runtime(136)).toBe('136 min');

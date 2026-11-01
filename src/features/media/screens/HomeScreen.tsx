@@ -14,11 +14,10 @@ import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 import { CinematicBanner } from '../components/CinematicBanner';
 import { MediaRow } from '../components/MediaRow';
 import { SearchMediaSection } from '../components/SearchMediaSection';
+import { CINESCOPE_LOGO } from '../constants/mediaAssets';
 import { MEDIA_COLLECTIONS } from '../constants/mediaCollections';
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
 import type { MediaCollection } from '../types/mediaCollection.types';
-
-export const CINESCOPE_LOGO = require('../../../../assets/cinescope-logo.png');
 
 function SectionSeparator() {
   return <View style={styles.separator} />;

@@ -38,6 +38,7 @@ import { UNEXPECTED_FETCH_MESSAGE } from '../test-utils/testMessages';
 import MediaDetailsScreen from './MediaDetailsScreen';
 
 jest.mock('expo-router', () => ({
+  ...jest.requireActual<typeof import('expo-router')>('expo-router'),
   useLocalSearchParams: jest.fn(),
 }));
 
@@ -131,13 +132,27 @@ describe('MediaDetailsScreen', () => {
           .showsVerticalScrollIndicator,
       ).toBe(platform !== 'web');
 
+      if (platform === 'web') {
+        expect(
+          screen.getByRole('link', {
+            name: MEDIA_UI_MESSAGES.details.goHome,
+          }),
+        ).toBeTruthy();
+      } else {
+        expect(
+          screen.queryByRole('link', {
+            name: MEDIA_UI_MESSAGES.details.goHome,
+          }),
+        ).toBeNull();
+      }
+
       const contentStyle = StyleSheet.flatten(
         screen.getByTestId('details-scroll-view').props
           .contentContainerStyle,
       );
 
       if (platform === 'web' && width >= Breakpoints.desktop) {
-        expect(contentStyle.paddingTop).toBe(Spacing.xxxl);
+        expect(contentStyle.paddingTop).toBe(Spacing.lg);
       } else {
         expect(contentStyle.padding).toBe(Spacing.lg);
       }
@@ -453,7 +468,7 @@ describe('MediaDetailsScreen', () => {
     await renderDetails();
 
     await screen.findByRole('header', { name: movie.Title });
-    
+
     expect(screen.queryByTestId('details-awards')).toBeNull();
   });
 

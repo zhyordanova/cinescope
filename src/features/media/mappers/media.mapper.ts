@@ -224,7 +224,12 @@ function mapRatings(ratings: OmdbRating[]): MediaRating[] {
   const seenSources = new Set<MediaRatingSource>();
 
   return ratings.flatMap(({ Source, Value }) => {
-    const source = RATING_SOURCE_LABELS[Source];
+    const source = Object.prototype.hasOwnProperty.call(
+      RATING_SOURCE_LABELS,
+      Source,
+    )
+      ? RATING_SOURCE_LABELS[Source]
+      : undefined;
 
     if (!source || seenSources.has(source)) return [];
 
