@@ -48,12 +48,12 @@ Use **media** consistently for application features, routes, domain models, and 
 - Feature root: `src/features/media`.
 - Detail route: `src/app/media/[id].tsx` (`/media/:id`).
 - Domain models: `MediaSummary`, `MediaDetails`, and `MediaType`.
-- UI components: `MediaCard`, `MediaRow`, `HeroMedia`.
+- UI components: `MediaCard`, `MediaRow`, `CinematicBanner`, `DetailsPoster`, `PosterFallback`.
 - Screens: `HomeScreen`, `MediaDetailsScreen`.
 - Hooks: `useMediaCollection`, `useMediaDetails`.
 - API-facing naming can remain OMDb-specific, e.g. `omdbClient.ts` and `OmdbSearchResponse`.
 
-Suggested structure (create only what the current step requires):
+Current structure (representative, not an exhaustive file listing; create only what the current step requires):
 
 ```text
 src/
@@ -70,25 +70,33 @@ src/
 │       ├── components/
 │       │   ├── MediaCard.tsx
 │       │   ├── MediaRow.tsx
-│       │   └── HeroMedia.tsx
+│       │   ├── CinematicBanner.tsx
+│       │   ├── DetailsPoster.tsx
+│       │   └── PosterFallback.tsx
+│       ├── constants/
+│       ├── data/
 │       ├── screens/
 │       │   ├── HomeScreen.tsx
 │       │   └── MediaDetailsScreen.tsx
 │       ├── hooks/
 │       │   ├── useMediaCollection.ts
-│       │   └── useMediaDetails.ts
-│       ├── media.mapper.ts
-│       ├── media.types.ts
-│       ├── omdb.types.ts
-│       ├── media.queries.ts
-│       └── collections.ts
-├── shared/
-│   ├── components/
-│   │   ├── ErrorState.tsx
-│   │   └── PosterImage.tsx
-│   └── theme/
-│       ├── colors.ts
-│       └── spacing.ts
+│       │   ├── useMediaDetails.ts
+│       │   └── useMediaSearch.ts
+│       ├── mappers/
+│       │   └── media.mapper.ts
+│       ├── queries/
+│       │   └── media.queries.ts
+│       ├── types/
+│       │   ├── media.types.ts
+│       │   └── omdb.types.ts
+│       ├── test-utils/
+│       └── utils/
+├── components/
+│   ├── ErrorState.tsx
+│   └── EmptyState.tsx
+├── constants/
+│   └── theme.ts
+├── hooks/
 └── providers/
     └── QueryProvider.tsx
 ```
