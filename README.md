@@ -214,4 +214,4 @@ UI are agreed extensions.
 
 Read [AGENTS.md](./AGENTS.md) for architectural decisions and the
 approval-gated contribution workflow. Detailed task tracking and release
-checklists live in [GitHub Issues](https://github.com/zhyordanova/cinescope/issues).
+checklists live on the [GitHub Project board](https://github.com/users/zhyordanova/projects/1).
