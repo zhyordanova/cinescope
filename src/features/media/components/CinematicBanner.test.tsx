@@ -128,7 +128,7 @@ describe('CinematicBanner', () => {
     ).toBe(getCinematicBannerArtwork(1440));
   });
 
-  it('uses CSS height on Web even before hydration', async () => {
+  it('uses CSS minimum height on Web even before hydration', async () => {
     jest.replaceProperty(Platform, 'OS', 'web');
     jest.mocked(useResponsiveWidth).mockReturnValue(0);
     await render(<CinematicBanner />);
@@ -140,9 +140,70 @@ describe('CinematicBanner', () => {
     expect(
       StyleSheet.flatten(banner.props.style).height,
     ).toBeUndefined();
+    expect(
+      StyleSheet.flatten(banner.props.style).minHeight,
+    ).toBeUndefined();
 
     expect(screen.getByRole('progressbar')).toBeTruthy();
   });
+
+  it.each(['ios', 'android'] as const)(
+    'keeps loading and error branding separate from copy in a growing layout on %s',
+    async (platform) => {
+      jest.replaceProperty(Platform, 'OS', platform);
+      await render(<CinematicBanner />);
+
+      const banner = screen.getByTestId('cinematic-banner');
+
+      expect(StyleSheet.flatten(banner.props.style)).toMatchObject({
+        minHeight: 360,
+      });
+
+      expect(
+        StyleSheet.flatten(banner.props.style).height,
+      ).toBeUndefined();
+
+      const expectSeparateLayout = () => {
+        const placeholder = screen.getByTestId(
+          'cinematic-banner-placeholder',
+        );
+
+        const copy = screen.getByTestId('cinematic-banner-copy');
+
+        expect(placeholder.parent).toBe(copy.parent);
+
+        expect(
+          StyleSheet.flatten(placeholder.props.style),
+        ).toMatchObject({
+          flexGrow: 1,
+          flexShrink: 0,
+        });
+        expect(
+          StyleSheet.flatten(placeholder.props.style).position,
+        ).toBeUndefined();
+        expect(StyleSheet.flatten(copy.props.style).flexShrink).toBe(
+          0,
+        );
+
+        expect(
+          screen.getByRole('header', {
+            name: MEDIA_UI_MESSAGES.home.bannerHeadline,
+          }).props.allowFontScaling,
+        ).not.toBe(false);
+      };
+
+      expectSeparateLayout();
+      await fireEvent(
+        screen.getByTestId('cinematic-banner-artwork', {
+          includeHiddenElements: true,
+        }),
+        'error',
+      );
+
+      expectSeparateLayout();
+      expect(screen.queryByRole('progressbar')).toBeNull();
+    },
+  );
 
   it('renders the approved copy as accessible text and hides decorative artwork', async () => {
     await render(<CinematicBanner />);
@@ -184,9 +245,33 @@ describe('CinematicBanner', () => {
     const webRender = await render(<CinematicBanner />);
     const webBanner = webRender.getByTestId('cinematic-banner');
 
-    expect(
-      StyleSheet.flatten(webBanner.props.style).justifyContent,
-    ).toBe('flex-start');
+    const expectTopAlignedCopy = () => {
+      expect(StyleSheet.flatten(webBanner.props.style)).toMatchObject(
+        {
+          flexDirection: 'column-reverse',
+          justifyContent: 'flex-end',
+        },
+      );
+      expect(
+        screen.getByTestId('cinematic-banner-copy'),
+      ).toBeTruthy();
+    };
+    expectTopAlignedCopy();
+
+    await fireEvent(
+      screen.getByTestId('cinematic-banner-artwork', {
+        includeHiddenElements: true,
+      }),
+      'error',
+    );
+    expectTopAlignedCopy();
+    await fireEvent(
+      screen.getByTestId('cinematic-banner-artwork', {
+        includeHiddenElements: true,
+      }),
+      'display',
+    );
+    expectTopAlignedCopy();
 
     expect(
       webRender.getByTestId('cinematic-banner-artwork', {

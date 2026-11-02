@@ -40,6 +40,14 @@ function BannerArtwork({ width }: { width: number }) {
     <>
       {status !== 'ready' && (
         <View
+          pointerEvents="none"
+          accessible={false}
+          aria-hidden
+          style={[styles.artwork, styles.placeholderBackground]}
+        />
+      )}
+      {status !== 'ready' && (
+        <View
           testID="cinematic-banner-placeholder"
           style={styles.placeholder}
           accessible={status === 'loading'}
@@ -109,7 +117,7 @@ export function CinematicBanner() {
         styles.container,
         Platform.OS === 'web' && styles.webContainer,
         Platform.OS !== 'web' && {
-          height: getCinematicBannerHeight(width),
+          minHeight: getCinematicBannerHeight(width),
         },
       ]}
     >
@@ -118,7 +126,7 @@ export function CinematicBanner() {
         key={width < Breakpoints.tablet ? 'mobile' : 'wide'}
         width={width}
       />
-      <View style={styles.copy}>
+      <View testID="cinematic-banner-copy" style={styles.copy}>
         <ThemedText
           type="subtitle"
           accessibilityRole="header"
@@ -143,19 +151,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   webContainer: {
-    justifyContent: 'flex-start',
+    flexDirection: 'column-reverse',
+    justifyContent: 'flex-end',
   },
   placeholder: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: Colors.surface,
+    flexGrow: 1,
+    flexShrink: 0,
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
     padding: Spacing.lg,
+  },
+  placeholderBackground: {
+    backgroundColor: Colors.surface,
   },
   symbol: {
     width: 96,
@@ -171,6 +179,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   copy: {
+    flexShrink: 0,
     gap: Spacing.sm,
     padding: Spacing.xl,
     maxWidth: 680,

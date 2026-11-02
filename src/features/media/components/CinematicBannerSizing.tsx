@@ -11,12 +11,12 @@ export function getCinematicBannerHeight(width: number) {
 }
 
 const WEB_BANNER_STYLES = `
-[data-cinematic-banner] { height: ${getCinematicBannerHeight(0)}px; }
+[data-cinematic-banner] { min-height: ${getCinematicBannerHeight(0)}px; }
 @media (min-width: ${Breakpoints.tablet}px) {
-  [data-cinematic-banner] { height: ${getCinematicBannerHeight(Breakpoints.tablet)}px; }
+  [data-cinematic-banner] { min-height: ${getCinematicBannerHeight(Breakpoints.tablet)}px; }
 }
 @media (min-width: ${Breakpoints.desktop}px) {
-  [data-cinematic-banner] { height: ${getCinematicBannerHeight(Breakpoints.desktop)}px; }
+  [data-cinematic-banner] { min-height: ${getCinematicBannerHeight(Breakpoints.desktop)}px; }
 }
 `;
 

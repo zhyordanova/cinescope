@@ -26,7 +26,7 @@ describe('CinematicBannerSizing', () => {
     expect(getCinematicBannerHeight(width)).toBe(expected);
   });
 
-  it('emits inline Web CSS with the approved heights and breakpoints', () => {
+  it('emits inline Web CSS with minimum heights that allow content to grow', () => {
     jest.replaceProperty(Platform, 'OS', 'web');
     const element = CinematicBannerSizing();
 
@@ -35,15 +35,15 @@ describe('CinematicBannerSizing', () => {
     const css = element?.props.dangerouslySetInnerHTML.__html;
 
     expect(css).toContain(
-      '[data-cinematic-banner] { height: 360px; }',
+      '[data-cinematic-banner] { min-height: 360px; }',
     );
 
     expect(css).toContain(
-      '@media (min-width: 600px) {\n  [data-cinematic-banner] { height: 380px; }',
+      '@media (min-width: 600px) {\n  [data-cinematic-banner] { min-height: 380px; }',
     );
 
     expect(css).toContain(
-      '@media (min-width: 1024px) {\n  [data-cinematic-banner] { height: 600px; }',
+      '@media (min-width: 1024px) {\n  [data-cinematic-banner] { min-height: 600px; }',
     );
   });
 
