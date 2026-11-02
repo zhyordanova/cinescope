@@ -61,7 +61,7 @@ describe('media UI messages', () => {
     expect(MEDIA_UI_MESSAGES.collection.errorTitle).toBe(
       "Couldn't load this collection",
     );
-    
+
     expect(MEDIA_UI_MESSAGES.collection.errorDescription).toBe(
       'Something went wrong while loading these titles.',
     );

@@ -190,7 +190,7 @@ describe('PosterFallback', () => {
         layout: { x: 0, y: 0, width: 300, height: 450 },
       },
     });
-    
+
     expect(StyleSheet.flatten(label.props.style).opacity).toBe(1);
   });
 });

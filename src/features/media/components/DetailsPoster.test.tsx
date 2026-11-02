@@ -231,7 +231,7 @@ describe('DetailsPoster', () => {
         includeHiddenElements: true,
       }).props.source,
     ).toEqual({ uri: 'https://example.com/new.jpg' });
-    
+
     expect(
       screen.getByTestId('details-poster-background', {
         includeHiddenElements: true,
