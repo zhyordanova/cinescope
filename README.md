@@ -1,274 +1,217 @@
 # CineScope
 
-CineScope is an Expo, React Native, and TypeScript media discovery
-app. Home displays curated and live OMDb Search collections in a
-vertical list of horizontal media rows. Selecting a card opens live
-OMDb Details through the Home → Media Details → Back flow.
+CineScope is a Netflix-inspired media discovery app built with Expo,
+React Native, and TypeScript for iOS, Android, and Web. Browse mixed
+movie and series collections, then open a shared Media Details screen
+with live metadata from the [OMDb API](https://www.omdbapi.com/).
 
-## Phase 4 collection foundation
+## Screenshots
 
-[Collection definitions](./src/features/media/constants/mediaCollections.ts)
-configure Beyond Reality, Batman on Screen, Journeys & Discoveries,
-and Holiday Magic (OMDb search term `Christmas`) in that order on Home.
+### Home
 
-Beyond Reality uses eight local
-[`MediaSummary` snapshots](./src/features/media/data/beyondRealityMedia.ts) from OMDb
-Details responses validated on October 29, 2026, alternating Movie and
-Series in the approved order. Only summary fields and remote poster URLs
-are stored; images are not bundled. URLs passed format validation, not
-image-download verification. These snapshots are static and may need
-future maintenance; they must not seed the live Details query cache or
-trigger Details requests on Home.
+**iOS / Android**
 
-The three Search definitions allow movies and series and cap each row
-at ten cards.
-[`useMediaCollection`](./src/features/media/hooks/useMediaCollection.ts)
-fetches Search collections using page 1 without a type filter, reusing
-the existing Search hook, query keys, caching, cancellation, and retries.
-It exposes derived `items` alongside the original query state and
-`refetch`: items are undefined before data is available, and an empty
-array means a successful response has no eligible cards. Selection
-does not modify the cached Search result. Each collection has an
-independent lifecycle; curated snapshots do not use this hook.
-[Selection rules](./src/features/media/utils/selectCollectionItems.ts)
-filter allowed types, deduplicate IMDb IDs within a collection (first
-eligible occurrence wins), then apply the limit, preserving order.
-Missing posters and years do not exclude an otherwise eligible card.
-The same title may appear in different collections. These are title-based
-collections, not genre, popularity, or trending rankings.
+Two scroll positions of the same Home screen: the banner and the collections below.
 
-Hook integration tests use mocked Fetch with the real data layer to
-verify loading, selection, empty results, errors and manual retry,
-shared-cache reuse, and exactly three initial Search requests with no
-Details requests. Run
-`npm test -- --runInBand src/features/media/hooks/useMediaCollection.test.tsx`.
+![Home on Android and iOS showing the cinematic banner and Beyond Reality collection](./docs/screenshots/home-mobile-banner.png)
 
-[`SearchMediaSection`](./src/features/media/components/SearchMediaSection.tsx)
-connects each Search collection to a presentational media row with
-independent loading, error, empty, and retry states. Cached cards stay
-visible if a background refresh fails. With an empty cache and no
-retries, mounting all Home sections makes three Search requests and
-no Details requests. The temporary navigation counter and mock titles
-have been removed.
+![Home on Android and iOS scrolled to Batman on Screen, Journeys & Discoveries, and Holiday Magic](./docs/screenshots/home-mobile-collections.png)
 
-Home integration tests cover collection order, independent states and
-retry, cached-data refresh errors, episode exclusion, request counts,
-and ID-only navigation. Run
-`npm test -- --runInBand src/features/media/screens/HomeScreen.test.tsx`.
-Browser validation with mocked OMDb data confirmed movie and series
-Details navigation, the screen Back action, and browser-history Back.
-In the tested desktop flow, returning from series Details preserved
-Home's vertical offset (772px) and the Holiday Magic row's horizontal
-offset (152px). A 390px-wide web viewport showed a partial next card
-without page-level horizontal overflow; arrow controls reached the
-end and supported keyboard activation.
-These checks do not establish native behavior: Android system Back,
-iOS swipe-back, native swipe scrolling, font scaling, and scroll
-preservation still require device verification.
+**Web**
 
-On web, overflowing media rows offer accessible left/right arrow overlays
-at the sides of each list, rather than text buttons beside the heading,
-that scroll by one viewport width and disable at the start/end.
-Controls are hidden when all cards fit; native rows retain swipe
-scrolling without these buttons. Mouse and keyboard control movement
-and boundary states have been verified in the browser.
+![Home on Web showing the cinematic banner and Beyond Reality collection](./docs/screenshots/home-web-banner.png)
 
-## Current navigation
+![Home on Web scrolled to the horizontal media collections](./docs/screenshots/home-web-collections.png)
 
-Media screen/component text and accessibility-label formatters live in
-[mediaUiMessages.ts](./src/features/media/constants/mediaUiMessages.ts).
-Collection titles remain in collection configuration, and API error
-messages remain separate from UI copy.
-Component and screen tests reuse these messages for text queries;
-colocated message tests use literal expectations to independently verify
-dynamic formatting and optional-year accessibility labels.
+### Media Details
 
-Retry and Back actions share
-[ThemedButton](./src/components/themed-button.tsx), which provides
-consistent themed styling, button accessibility, and disabled behavior.
-Media cards remain separate.
+**iOS / Android**
 
-- [Home route](./src/app/index.tsx) renders the feature-owned
-  [HomeScreen](./src/features/media/screens/HomeScreen.tsx).
-- [Details route](./src/app/media/[id].tsx) renders the shared
-  [MediaDetailsScreen](./src/features/media/screens/MediaDetailsScreen.tsx).
-- Only the IMDb ID is passed to `/media/[id]`. Details validates the
-  format and fetches live metadata through `useMediaDetails`.
-- Details supports loading, API errors, and manual retry. Missing
-  optional metadata is omitted; absent plots have a text fallback.
-  Movie, series, and episode labels are supported, and seasons are
-  shown only for series when available.
-- Invalid IDs do not trigger requests. Direct entry without Stack
-  history offers a Home action. Home cards use cached remote posters
-  with a fallback; Details poster UI remains deferred.
+Two scroll positions of Media Details, showing a series on Android and a movie on iOS.
 
-## Startup
+![Media Details on Android and iOS showing titles, posters, metadata, ratings, and the start of the overview](./docs/screenshots/media-details-mobile-overview.png)
 
-The native splash screen is configured in [app.json](./app.json)
-using `expo-splash-screen` and its existing image. Expo handles its
-dismissal automatically; there is no additional animated Expo-logo
-overlay or manual startup delay.
+![Media Details on Android and iOS scrolled to the overview, credits, production details, and awards](./docs/screenshots/media-details-mobile-credits.png)
 
-## Validation
+**Web**
 
-Run `npm run check` for TypeScript, ESLint, and Prettier validation.
+Movie and series examples using the shared Media Details screen.
 
-The Phase 4 validation run passed all 219 Jest tests, TypeScript, and
-ESLint. The full `npm run check` remains blocked by a Prettier warning
-in [themed-button.test.tsx](./src/components/themed-button.test.tsx);
-that unrelated file was left unchanged.
+![Inception movie details on Web with poster, ratings, overview, credits, and production information](./docs/screenshots/media-details-web-movie.png)
 
-## Data contracts and tests
+![Dark series details on Web with poster, seasons, rating, overview, credits, and awards](./docs/screenshots/media-details-web-series.png)
 
-The first data-layer increment adds OMDb response contracts, runtime
-validation, domain models in
-[types](./src/features/media/types), and pure mappers with colocated
-tests in [mappers](./src/features/media/mappers). It does not make API
-requests or change the mock navigation screens.
+## Features
 
-- Search and Details responses are validated from `unknown`.
-- Missing/invalid identity fields cause an explicit response error.
-- Optional unavailable or malformed metadata is normalized to `null`
-  (or an empty genres array). Poster URLs must use HTTP or HTTPS.
-- `year` preserves a single year or a complete/open series year range
-  as text; unavailable or malformed years become `null`.
-- The data layer recognizes movies, series, and episodes without Home
-  filtering or any curated collection strategy.
-- OMDb failures remain distinct from invalid payloads and successful
-  empty searches.
+- Dark Midnight Teal design with a responsive cinematic banner.
+- Vertical collection browsing and horizontal media rows. Overflowing
+  Web rows include keyboard-accessible previous/next controls; native
+  rows support swipe scrolling.
+- Movie and Series labels, poster fallbacks, and loading skeletons.
+- Independently fetched collections with empty, error, and retry states.
+  Cached content remains visible if a background refresh fails.
+- Live Details by IMDb ID, including a layered poster, plot, metadata,
+  critics' ratings, credits, and optional production information.
+- Native Stack Back navigation; on Web, the CineScope logo links to
+  Home. Native direct entry without Back history also offers the Home
+  logo link. Invalid Details IDs are handled without an API request.
 
-Run `npm test -- --runInBand` for the Jest suite, or
-`npm test -- --runInBand src/features/media/mappers/media.mapper.test.ts`
-for the validation/mapping tests. Test fixtures require no API key.
-`npm run check` does not run tests; run both commands when validating
-data-layer changes.
+### Collections and data
 
-Fetch-using test suites reject unexpected requests by default.
-Tests explicitly configure mocked responses; they do not call OMDb.
+Home displays these collections in order:
 
-Details screen integration tests use React Native Testing Library,
-the real query/repository/mapper chain, and mocked Fetch and navigation.
-They cover route validation, loading, metadata, errors and retry,
-cached-data refresh failures, and Back/Home actions without a real key.
-Run `npm test -- --runInBand src/features/media/screens/MediaDetailsScreen.test.tsx`.
-Jest discovers both `.test.ts` and `.test.tsx` files. Native gestures
-and actual navigation history still require device verification.
+1. **Beyond Reality** — eight locally stored OMDb summary snapshots.
+2. **Batman on Screen** — live title search for `Batman`.
+3. **Journeys & Discoveries** — live title search for `Journey`.
+4. **Holiday Magic** — live title search for `Christmas`.
 
-## OMDb requests and configuration
+Search collections use page 1, allow movies and series, exclude standalone
+episodes, deduplicate IMDb IDs within each row, and show up to ten cards.
+These are title-based collections, **not trending, popularity, or
+genre-discovery rankings**.
 
-The [API layer](./src/features/media/api) provides native Fetch
-transport and the `searchMedia` / `getMediaDetails` repository
-functions. These return mapped domain data, not raw OMDb responses.
+Beyond Reality uses static metadata and remote poster URLs, not bundled
+poster images. Its visible titles, years, and type labels show placeholders
+until all initial Search queries settle, including failures. This is an
+intentional presentation choice, not a check that poster images have loaded.
+Retries do not hide the metadata again.
 
-1. Obtain a key at https://www.omdbapi.com/apikey.aspx and activate it
-   using the email OMDb sends.
-2. Copy [.env.example](./.env.example) to `.env.local` and set your own
-   `EXPO_PUBLIC_OMDB_API_KEY`. Local environment files are Git-ignored.
-3. Restart Expo after changing the value and fully reload the app.
+Home does not fetch Details per card or seed the Details cache with curated
+snapshots. Selecting a card passes only its IMDb ID; Details fetches live
+data independently. OMDb responses are validated and mapped into domain
+models, including handling unavailable or malformed optional metadata.
 
-`EXPO_PUBLIC_` values are included in the client bundle and are not
-secrets. Never commit a real key or paste it into logs or screenshots.
-No key is required for automated tests or the curated Home row.
-Live Search collections and Details require a configured key.
-Key activation and real API connectivity must be verified separately;
-mocked tests do not establish either.
+## Technology
 
-- Search accepts an optional single `type`, a four-digit integer
-  `year`, and `page` from 1 to 100. Omitting `type` allows mixed
-  results, including episodes; no Home filtering is performed.
-- Details accepts an IMDb title ID and requests the full plot.
-- Both accept an optional `signal` and preserve cancellation.
-- Invalid inputs and missing keys fail before a request is sent.
-- Transport errors distinguish HTTP status, network/body-read
-  failures, and invalid JSON. Raw URLs and transport error messages
-  are not included in the application errors.
-- Mappers distinguish OMDb application failures from invalid response
-  structures; neither becomes an empty successful result.
-- Application-owned data-layer error messages live in
-  [mediaErrorMessages.ts](./src/features/media/constants/mediaErrorMessages.ts). OMDb's own
-  error text is handled separately.
-- The repository itself has no retries or caching and makes no
-  per-card detail requests.
+- Expo, React Native, and React Native Web.
+- TypeScript with strict checking.
+- Expo Router with Stack navigation.
+- TanStack Query for caching, request deduplication, and query lifecycle.
+- Native `fetch` for OMDb requests and cancellation.
+- `expo-image` for media artwork and caching.
+- React Native `StyleSheet` with centralized theme tokens.
+- Jest, React Native Testing Library, ESLint, and Prettier.
 
-Run `npm test -- --runInBand src/features/media/api` for the mocked
-request, parameter, failure, and cancellation tests.
+## Getting started
 
-## Query lifecycle
+### Prerequisites
 
-[QueryProvider](./src/providers/QueryProvider.tsx) creates a stable
-client for the mounted app. The reusable
-[hooks](./src/features/media/hooks) use shared
-[query options](./src/features/media/queries/media.queries.ts):
+- Node.js compatible with the installed Expo SDK. Node **22.x, version
+  22.13.0 or newer**, is one supported runtime line.
+- npm; the repository includes a `package-lock.json`.
+- An activated [OMDb API key](https://www.omdbapi.com/apikey.aspx).
+- For iOS Simulator: macOS and Xcode with a configured simulator.
+- For Android Emulator: Android Studio with a configured emulator.
 
-- Search keys include trimmed text, type, year, and page. An omitted
-  page and page 1 share a cache entry. Details keys use the IMDb ID.
-  Neither contains the API key.
-- Search results stay fresh for 5 minutes; inactive entries are
-  retained for 10 minutes. Details uses 10 and 30 minutes respectively.
-  Becoming stale does not itself trigger a request.
-- Identical concurrent queries share a request. Query cancellation
-  forwards TanStack Query's signal to the repository and Fetch.
-- Network/body-read failures and HTTP 5xx responses retry at most
-  twice using TanStack Query's default exponential delay. Other HTTP,
-  configuration, input, JSON, OMDb, and response validation errors do
-  not retry. Unrelated queries default to no retries.
-- Empty searches and invalid Details IDs are disabled for automatic
-  fetching; callers must render their own input/route validation states.
+### Install and configure
 
-Run `npm test -- --runInBand src/features/media/queries/media.queries.test.ts`
-for query lifecycle tests, which use mocked Fetch without real keys.
-Native focus/connectivity integration is not configured in this increment.
-Details uses the query hook; Home still uses fixtures. Live Home
-integration and collection strategy remain deferred.
+From the repository root:
 
-## Manual navigation verification
+```bash
+npm ci
+cp .env.example .env
+```
 
-With the app running and an activated OMDb key configured:
+Set your activated key in `.env`:
 
-1. On Home, increment the navigation-check counter.
-2. Open **The Matrix (Movie)** and confirm the title, type, and
-   `tt0133093` ID. Use **Go back** and confirm the counter is unchanged.
-3. Scroll to **House of the Dragon (Series)** and open it. Confirm
-   `tt11198330`, then return using the Stack header Back control.
-   Confirm the Home scroll position and counter are preserved.
-4. Repeat using Android system Back and iOS swipe-back on a device
-   or simulator. Web testing does not verify native Back behavior.
-5. In a fresh browser tab, directly open `/media/tt0903747`.
-   Confirm **Breaking Bad (Series)** renders and **Go to Home**
-   returns to `/` when there is no Stack history.
-6. Directly open `/media/invalid` and `/media/tt0000000`.
-   Confirm **Invalid media ID** (without an API request) and an OMDb
-   error with a **Retry** action respectively. Both retain a working
-   return action.
-7. Check a narrow viewport and increased text size for readable
-   titles and accessible controls.
-8. Test Details with a slow connection and then offline. Confirm
-   loading and error feedback, restore connectivity, and use **Retry**.
-   A fresh cached title may render without a request; use another ID
-   or reload with an empty cache to exercise the initial failure state.
-9. Verify missing optional metadata does not render `N/A`, a series
-   displays seasons when available, and a movie does not.
+```dotenv
+EXPO_PUBLIC_OMDB_API_KEY=your_activated_omdb_key
+```
 
-## Get started
+See [.env.example](./.env.example). Local environment files are Git-ignored.
+Restart Expo and fully reload the app after changing the value.
 
-1. Install dependencies
+**`EXPO_PUBLIC_` values are bundled into the client and are not secrets.**
+Never commit a real key or include it in shared logs, request URLs, or
+screenshots. Live Search and Details require the key; automated tests do
+not. Curated snapshots require no key, but their posters still need network
+access.
 
-   ```bash
-   npm install
-   ```
+### Run
 
-2. Start the app
+```bash
+npm start         # Start Expo and choose a development target
+npm run web       # Open the Web app
+npm run ios       # Open iOS Simulator
+npm run android   # Open an Android target
+```
 
-   ```bash
-   npx expo start
-   ```
+Use a development runtime compatible with the installed Expo SDK and native
+modules. Expo Go compatibility and device launch behavior must be verified
+separately; the presence of a start script is not proof of compatibility.
+See [Expo development builds](https://docs.expo.dev/develop/development-builds/introduction/).
 
-In the output, you'll find options to open the app in a
+## Scripts and validation
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Command                   | Purpose                                    |
+| ------------------------- | ------------------------------------------ |
+| `npm test -- --runInBand` | Run the Jest suite                         |
+| `npm run typecheck`       | Check TypeScript without emitting files    |
+| `npm run lint`            | Run ESLint                                 |
+| `npm run format:check`    | Check Prettier formatting                  |
+| `npm run check`           | Run typecheck, lint, and formatting checks |
+| `npm run lint:fix`        | Apply ESLint fixes                         |
+| `npm run format`          | Format the repository                      |
 
-Routes live in [src/app](./src/app) and screen implementations live
-in [src/features/media/screens](./src/features/media/screens).
+**`npm run check` does not run tests.** Run it and the test suite separately.
+Tests are colocated as `.test.ts` / `.test.tsx` files. API and integration
+tests use mocked Fetch responses rather than live OMDb requests.
+
+For example, run only the Details screen tests with:
+
+```bash
+npm test -- --runInBand src/features/media/screens/MediaDetailsScreen.test.tsx
+```
+
+## Project structure
+
+```text
+src/
+├── app/                    # Thin Expo Router routes and root Stack
+├── components/             # Shared themed components and UI states
+├── constants/theme.ts      # Colors, typography, spacing, and sizing
+├── features/media/
+│   ├── api/                # OMDb transport and media repository
+│   ├── components/         # Media UI, skeletons, and Web sizing styles
+│   ├── constants/          # Collections, assets, and messages
+│   ├── data/               # Curated summary snapshots
+│   ├── hooks/              # Search, collection, and Details hooks
+│   ├── mappers/            # Response validation and domain mapping
+│   ├── queries/            # Query keys, caching, and retry options
+│   ├── screens/            # HomeScreen and MediaDetailsScreen
+│   ├── test-utils/         # Fixtures and test environment helpers
+│   ├── types/              # OMDb DTOs and internal domain contracts
+│   └── utils/              # ID validation and collection selection
+├── hooks/                  # Shared theme and responsive hooks
+└── providers/              # Stable TanStack Query client
+```
+
+Routes are `/` and `/media/[id]`. Presentational media components do not
+fetch OMDb data; screens and hooks connect them to the data layer.
+
+## Limitations and verification
+
+- OMDb does not provide native trending or general genre-discovery
+  endpoints. Curated snapshots and remote poster URLs may need maintenance.
+- Search results are fresh for five minutes and retained for ten minutes
+  after becoming inactive. Details uses ten and thirty minutes respectively.
+  Network and HTTP 5xx failures retry at most twice; other request failures
+  do not automatically retry.
+- Automated tests do not establish live API-key activation, image
+  availability, screen-reader behavior, native gestures, or scroll
+  preservation across real navigation.
+- Final accessibility/responsive QA, fresh-install verification, production
+  Web export/runtime validation, and native launch verification remain
+  separate release checks. No full release-readiness claim is made here.
+- Pagination/See All, episode browsing, accounts, watchlists, and streaming
+  are outside the current scope.
+
+## Requirements and contribution workflow
+
+The [original project requirements](./docs/project-requirements.md) remain
+the baseline specification. Mixed movie/series collections and the current
+UI are agreed extensions.
+
+Read [AGENTS.md](./AGENTS.md) for architectural decisions and the
+approval-gated contribution workflow. Detailed task tracking and release
+checklists live in [GitHub Issues](https://github.com/zhyordanova/cinescope/issues).
