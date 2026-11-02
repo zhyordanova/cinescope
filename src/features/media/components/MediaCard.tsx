@@ -1,15 +1,21 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import {
-  Breakpoints,
   Colors,
   Radii,
   Sizing,
   Spacing,
+  Typography,
 } from '@/constants/theme';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
@@ -17,29 +23,24 @@ import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
 import type { MediaSummary } from '../types/media.types';
 
 import { MediaTypeBadge } from './MediaTypeBadge';
+import { getMediaCardWidth } from './MediaCardSizing';
+import { PosterFallback } from './PosterFallback';
+import { MediaCardTextSkeleton } from './MediaCardTextSkeleton';
 
 type MediaCardProps = {
   media: MediaSummary;
   onPress: () => void;
+  showMetadata?: boolean;
 };
-
-export function getMediaCardWidth(width: number) {
-  if (width < Breakpoints.tablet) {
-    return Math.max(
-      120,
-      Math.min(160, Math.round((width - 32) * 0.4)),
-    );
-  }
-
-  return width < Breakpoints.desktop ? 176 : 190;
-}
 
 function Poster({
   url,
   mediaType,
+  showMetadata,
 }: {
   url: string | null;
   mediaType: MediaSummary['type'];
+  showMetadata: boolean;
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -56,21 +57,23 @@ function Poster({
           onError={() => setFailed(true)}
         />
       ) : (
-        <ThemedText
-          type="small"
-          themeColor="textSecondary"
-          style={styles.fallback}
-        >
-          {MEDIA_UI_MESSAGES.posterUnavailable}
-        </ThemedText>
+        <PosterFallback accessible={false} />
       )}
-      <MediaTypeBadge mediaType={mediaType} variant="poster" />
+      {showMetadata && (
+        <MediaTypeBadge mediaType={mediaType} variant="poster" />
+      )}
     </ThemedView>
   );
 }
 
-export function MediaCard({ media, onPress }: MediaCardProps) {
+export function MediaCard({
+  media,
+  onPress,
+  showMetadata = true,
+}: MediaCardProps) {
   const width = useResponsiveWidth();
+  const { fontScale } = useWindowDimensions();
+  const lineHeight = Typography.lineHeights.small * fontScale;
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -81,6 +84,7 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
           onHoverOut: () => setHovered(false),
           onFocus: () => setFocused(true),
           onBlur: () => setFocused(false),
+          dataSet: { mediaCardSizing: '' },
         }
       : {};
 
@@ -96,7 +100,7 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
-        { width: getMediaCardWidth(width) },
+        Platform.OS !== 'web' && { width: getMediaCardWidth(width) },
         hovered && styles.hovered,
         pressed && styles.pressed,
       ]}
@@ -113,20 +117,50 @@ export function MediaCard({ media, onPress }: MediaCardProps) {
         key={`${media.id}:${media.posterUrl}`}
         url={media.posterUrl}
         mediaType={media.type}
+        showMetadata={showMetadata}
       />
-      <ThemedText type="smallBold" numberOfLines={2}>
-        {media.title}
-      </ThemedText>
-      {media.year ? (
-        <ThemedText type="small" themeColor="textSecondary">
-          {media.year}
+      <View>
+        <ThemedText
+          type="smallBold"
+          numberOfLines={2}
+          style={!showMetadata && styles.hiddenMetadata}
+        >
+          {media.title}
         </ThemedText>
+        {!showMetadata && (
+          <MediaCardTextSkeleton
+            variant="title"
+            lineHeight={lineHeight}
+            overlay
+          />
+        )}
+      </View>
+      {media.year ? (
+        <View>
+          <ThemedText
+            type="small"
+            themeColor="textSecondary"
+            style={!showMetadata && styles.hiddenMetadata}
+          >
+            {media.year}
+          </ThemedText>
+          {!showMetadata && (
+            <MediaCardTextSkeleton
+              variant="year"
+              lineHeight={lineHeight}
+              overlay
+            />
+          )}
+        </View>
       ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  hiddenMetadata: {
+    opacity: 0,
+  },
   card: {
     position: 'relative',
     maxWidth: '100%',
@@ -158,10 +192,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-  },
-  fallback: {
-    textAlign: 'center',
-    padding: Spacing.sm,
   },
   pressed: {
     opacity: 0.7,

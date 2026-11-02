@@ -29,7 +29,7 @@ describe('DetailsTextSection', () => {
     ).toBeTruthy();
 
     expect(screen.getByText('A complete description.')).toBeTruthy();
-    
+
     expect(
       StyleSheet.flatten(
         screen.getByTestId('details-test-section').props.style,

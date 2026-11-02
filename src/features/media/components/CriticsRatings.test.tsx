@@ -174,7 +174,7 @@ describe('CriticsRatings', () => {
       ).toBeTruthy();
 
       expect(within(section).getByText(expectedValue)).toBeTruthy();
-      
+
       expect(
         within(section).queryAllByTestId(/details-rating-card-/),
       ).toHaveLength(1);

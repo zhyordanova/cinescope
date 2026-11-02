@@ -9,6 +9,7 @@ export const MEDIA_TYPE_LABELS = {
 export const MEDIA_UI_MESSAGES = {
   home: {
     logoAccessibleLabel: 'CineScope',
+    bannerLoading: 'Loading artwork…',
     bannerHeadline: 'Every story starts with discovery.',
     bannerSubtitle:
       'Explore movies, series, and worlds beyond the ordinary.',
@@ -19,15 +20,25 @@ export const MEDIA_UI_MESSAGES = {
   previousTitles: (title: string) => `Previous titles in ${title}`,
   nextTitles: (title: string) => `Next titles in ${title}`,
   collection: {
-    empty: 'No movies or series available in this collection.',
+    emptyTitle: 'No titles available',
+    empty:
+      'There are no titles to display in this collection right now.',
     loading: (title: string) => `Loading ${title}…`,
-    error: (title: string, message: string) => `${title}: ${message}`,
-    retry: (title: string) => `Retry ${title}`,
-    retrying: (title: string) => `Retrying ${title}…`,
+    errorTitle: "Couldn't load this collection",
+    errorDescription:
+      'Something went wrong while loading these titles.',
+    retryLabel: 'Try Again',
+    retryingLabel: 'Trying Again…',
+    retry: (title: string) => `Try Again: ${title}`,
+    retrying: (title: string) => `Trying Again: ${title}…`,
   },
   details: {
     invalidIdTitle: 'Invalid media ID',
-    errorTitle: 'Unable to load details',
+    errorTitle: "Couldn't load media details",
+    errorDescription:
+      "We couldn't retrieve information for this title.",
+    retry: 'Try Again',
+    retrying: 'Trying Again…',
     loadingTitle: 'Loading details',
     loading: 'Loading media details…',
     goHome: 'CineScope — Go to Home',

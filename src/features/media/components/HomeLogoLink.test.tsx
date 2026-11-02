@@ -34,7 +34,7 @@ describe('HomeLogoLink', () => {
     const homeLink = screen.getByRole('link', {
       name: MEDIA_UI_MESSAGES.details.goHome,
     });
-    
+
     expect(homeLink.props.href).toBe('/');
 
     await fireEvent(homeLink, 'focus');
@@ -66,7 +66,7 @@ describe('HomeLogoLink', () => {
         width: logoWidth,
         aspectRatio: 1448 / 1086,
       });
-      
+
       expect(logo.props.accessible).toBe(false);
       expect(logo.props['aria-hidden']).toBe(true);
     },

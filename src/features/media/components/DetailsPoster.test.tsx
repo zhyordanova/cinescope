@@ -117,25 +117,50 @@ describe('DetailsPoster', () => {
     },
   );
 
-  it('shows a fallback when the poster URL is unavailable', async () => {
-    await render(<DetailsPoster posterUrl={null} compact />);
+  it.each([
+    { compact: true, posterWidth: '55%', frameAspectRatio: 1.2 },
+    { compact: false, posterWidth: 200, frameAspectRatio: 1.12 },
+  ])(
+    'preserves fallback dimensions for compact=$compact',
+    async ({ compact, posterWidth, frameAspectRatio }) => {
+      await render(
+        <DetailsPoster posterUrl={null} compact={compact} />,
+      );
 
-    expect(
-      screen.getByText(MEDIA_UI_MESSAGES.posterUnavailable),
-    ).toBeTruthy();
+      expect(
+        screen.getByRole('image', {
+          name: MEDIA_UI_MESSAGES.posterUnavailable,
+        }),
+      ).toBeTruthy();
 
-    expect(
-      screen.queryByTestId('details-poster-background', {
-        includeHiddenElements: true,
-      }),
-    ).toBeNull();
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId('poster-fallback').props.style,
+        ),
+      ).toMatchObject({
+        width: posterWidth,
+        aspectRatio: Sizing.posterAspectRatio,
+      });
 
-    expect(
-      screen.queryByTestId('details-poster', {
-        includeHiddenElements: true,
-      }),
-    ).toBeNull();
-  });
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId('details-poster-frame').props.style,
+        ).aspectRatio,
+      ).toBe(frameAspectRatio);
+
+      expect(
+        screen.queryByTestId('details-poster-background', {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull();
+
+      expect(
+        screen.queryByTestId('details-poster', {
+          includeHiddenElements: true,
+        }),
+      ).toBeNull();
+    },
+  );
 
   it('shows a fallback when the poster image fails to load', async () => {
     await render(
@@ -154,7 +179,9 @@ describe('DetailsPoster', () => {
     );
 
     expect(
-      screen.getByText(MEDIA_UI_MESSAGES.posterUnavailable),
+      screen.getByRole('image', {
+        name: MEDIA_UI_MESSAGES.posterUnavailable,
+      }),
     ).toBeTruthy();
 
     expect(
@@ -162,11 +189,53 @@ describe('DetailsPoster', () => {
         includeHiddenElements: true,
       }),
     ).toBeNull();
-    
+
     expect(
       screen.queryByTestId('details-poster', {
         includeHiddenElements: true,
       }),
     ).toBeNull();
+  });
+
+  it('restores artwork when the screen remounts the poster for a new URL', async () => {
+    const view = await render(
+      <DetailsPoster
+        key="old"
+        posterUrl="https://example.com/old.jpg"
+        compact
+      />,
+    );
+
+    await fireEvent(
+      screen.getByTestId('details-poster', {
+        includeHiddenElements: true,
+      }),
+      'error',
+      { error: 'Image load failed' },
+    );
+
+    expect(screen.getByTestId('poster-fallback')).toBeTruthy();
+
+    await view.rerender(
+      <DetailsPoster
+        key="new"
+        posterUrl="https://example.com/new.jpg"
+        compact
+      />,
+    );
+
+    expect(screen.queryByTestId('poster-fallback')).toBeNull();
+
+    expect(
+      screen.getByTestId('details-poster', {
+        includeHiddenElements: true,
+      }).props.source,
+    ).toEqual({ uri: 'https://example.com/new.jpg' });
+    
+    expect(
+      screen.getByTestId('details-poster-background', {
+        includeHiddenElements: true,
+      }).props.source,
+    ).toEqual({ uri: 'https://example.com/new.jpg' });
   });
 });

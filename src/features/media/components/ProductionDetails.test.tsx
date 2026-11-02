@@ -109,7 +109,7 @@ describe('ProductionDetails', () => {
     );
 
     expect(queryByTestId('details-production-details')).toBeNull();
-    
+
     expect(
       queryByRole('header', {
         name: MEDIA_UI_MESSAGES.details.productionDetailsTitle,

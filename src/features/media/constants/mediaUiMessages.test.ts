@@ -58,20 +58,21 @@ describe('media UI messages', () => {
       MEDIA_UI_MESSAGES.collection.loading('Holiday Magic'),
     ).toBe('Loading Holiday Magic…');
 
-    expect(
-      MEDIA_UI_MESSAGES.collection.error(
-        'Holiday Magic',
-        'Request failed.',
-      ),
-    ).toBe('Holiday Magic: Request failed.');
+    expect(MEDIA_UI_MESSAGES.collection.errorTitle).toBe(
+      "Couldn't load this collection",
+    );
+    
+    expect(MEDIA_UI_MESSAGES.collection.errorDescription).toBe(
+      'Something went wrong while loading these titles.',
+    );
 
     expect(MEDIA_UI_MESSAGES.collection.retry('Holiday Magic')).toBe(
-      'Retry Holiday Magic',
+      'Try Again: Holiday Magic',
     );
 
     expect(
       MEDIA_UI_MESSAGES.collection.retrying('Holiday Magic'),
-    ).toBe('Retrying Holiday Magic…');
+    ).toBe('Trying Again: Holiday Magic…');
   });
 
   it('formats Details metadata, including units', () => {

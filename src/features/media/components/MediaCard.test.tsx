@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { Platform, StyleSheet } from 'react-native';
+import { Dimensions, Platform, StyleSheet } from 'react-native';
 import {
   cleanup,
   fireEvent,
   render,
   screen,
 } from '@testing-library/react-native/pure';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Spacing, Typography } from '@/constants/theme';
 
 import {
   MEDIA_TYPE_LABELS,
@@ -17,7 +17,7 @@ import {
   seriesSummary,
 } from '../test-utils/mediaFixtures';
 
-import { getMediaCardWidth, MediaCard } from './MediaCard';
+import { MediaCard } from './MediaCard';
 
 jest.mock('@/global.css', () => ({}));
 jest.mock('expo-image', () => ({
@@ -28,9 +28,97 @@ jest.mock('expo-image', () => ({
 
 afterEach(async () => {
   await cleanup();
+  jest.restoreAllMocks();
 });
 
 describe('MediaCard', () => {
+  it('hides metadata visually without removing text space or accessible navigation', async () => {
+    const onPress = jest.fn();
+
+    const { rerender } = await render(
+      <MediaCard
+        media={movieSummary}
+        onPress={onPress}
+        showMetadata={false}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId('media-type-badge', {
+        includeHiddenElements: true,
+      }),
+    ).toBeNull();
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByText(movieSummary.title, {
+          includeHiddenElements: true,
+        }).props.style,
+      ),
+    ).toMatchObject({ opacity: 0 });
+
+    for (const variant of ['title', 'year']) {
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId(`media-card-skeleton-${variant}`, {
+            includeHiddenElements: true,
+          }).props.style,
+        ),
+      ).toMatchObject({
+        height:
+          Typography.lineHeights.small *
+          Dimensions.get('window').fontScale,
+        position: 'absolute',
+      });
+    }
+
+    expect(
+      screen.getByTestId('poster-fallback', {
+        includeHiddenElements: true,
+      }),
+    ).toBeTruthy();
+
+    await fireEvent.press(
+      screen.getByRole('button', {
+        name: MEDIA_UI_MESSAGES.openMedia(
+          movieSummary.title,
+          movieSummary.type,
+          movieSummary.year,
+        ),
+      }),
+    );
+
+    expect(onPress).toHaveBeenCalledTimes(1);
+
+    await rerender(
+      <MediaCard media={movieSummary} onPress={onPress} />,
+    );
+
+    expect(
+      screen.queryByTestId('media-card-skeleton-title', {
+        includeHiddenElements: true,
+      }),
+    ).toBeNull();
+
+    expect(
+      screen.queryByTestId('media-card-skeleton-year', {
+        includeHiddenElements: true,
+      }),
+    ).toBeNull();
+
+    expect(
+      screen.getByTestId('media-type-badge', {
+        includeHiddenElements: true,
+      }),
+    ).toBeTruthy();
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByText(movieSummary.title).props.style,
+      ).opacity,
+    ).not.toBe(0);
+  });
+
   it('shows hover and keyboard-focus feedback on web', async () => {
     jest.replaceProperty(Platform, 'OS', 'web');
     await render(
@@ -38,6 +126,12 @@ describe('MediaCard', () => {
     );
 
     const card = screen.getByTestId('media-card');
+
+    expect(card.props.dataSet).toEqual({ mediaCardSizing: '' });
+
+    expect(
+      StyleSheet.flatten(card.props.style).width,
+    ).toBeUndefined();
 
     await fireEvent(card, 'hoverIn');
 
@@ -59,14 +153,6 @@ describe('MediaCard', () => {
     await fireEvent(card, 'blur');
 
     expect(screen.queryByTestId('media-card-focus-ring')).toBeNull();
-  });
-
-  it('adapts card width for mobile, tablet, and desktop layouts', () => {
-    expect(getMediaCardWidth(320)).toBe(120);
-    expect(getMediaCardWidth(390)).toBe(143);
-    expect(getMediaCardWidth(599)).toBe(160);
-    expect(getMediaCardWidth(600)).toBe(176);
-    expect(getMediaCardWidth(1024)).toBe(190);
   });
 
   it.each([
@@ -137,8 +223,13 @@ describe('MediaCard', () => {
     expect(screen.queryByTestId('media-poster')).toBeNull();
 
     expect(
-      screen.getByText(MEDIA_UI_MESSAGES.posterUnavailable),
+      screen.getByTestId('poster-fallback', {
+        includeHiddenElements: true,
+      }),
     ).toBeTruthy();
+
+    expect(screen.queryAllByRole('image')).toHaveLength(0);
+    expect(screen.getByTestId('media-type-badge')).toBeTruthy();
   });
 
   it('uses a cached decorative image and replaces it on load failure', async () => {
@@ -158,15 +249,22 @@ describe('MediaCard', () => {
     expect(image.props.cachePolicy).toBe('memory-disk');
     expect(image.props.accessible).toBe(false);
     expect(
-      screen.queryByText(MEDIA_UI_MESSAGES.posterUnavailable),
+      screen.queryByTestId('poster-fallback', {
+        includeHiddenElements: true,
+      }),
     ).toBeNull();
 
     await fireEvent(image, 'error', { error: 'Image load failed' });
 
     expect(screen.queryByTestId('media-poster')).toBeNull();
+
     expect(
-      screen.getByText(MEDIA_UI_MESSAGES.posterUnavailable),
+      screen.getByTestId('poster-fallback', {
+        includeHiddenElements: true,
+      }),
     ).toBeTruthy();
+
+    expect(screen.getByTestId('media-type-badge')).toBeTruthy();
   });
 
   it('resets a failed poster when the image URL changes', async () => {
@@ -202,7 +300,9 @@ describe('MediaCard', () => {
     });
 
     expect(
-      screen.queryByText(MEDIA_UI_MESSAGES.posterUnavailable),
+      screen.queryByTestId('poster-fallback', {
+        includeHiddenElements: true,
+      }),
     ).toBeNull();
   });
 

@@ -194,7 +194,7 @@ describe('MediaRow web controls', () => {
     const nextButton = screen.getByRole('button', {
       name: MEDIA_UI_MESSAGES.nextTitles(collectionTitle),
     });
-    
+
     const control = screen.getByTestId('media-row-next-control');
 
     await fireEvent(nextButton, 'focus');

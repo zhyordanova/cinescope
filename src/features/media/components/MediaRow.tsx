@@ -25,6 +25,7 @@ type MediaRowProps = {
   title: string;
   items: readonly MediaSummary[];
   onMediaPress: (id: string) => void;
+  showMetadata?: boolean;
 };
 
 type ArrowControlProps = {
@@ -90,6 +91,7 @@ export function MediaRow({
   title,
   items,
   onMediaPress,
+  showMetadata = true,
 }: MediaRowProps) {
   const listRef = useRef<FlatList<MediaSummary>>(null);
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -142,6 +144,7 @@ export function MediaRow({
           horizontal
           accessibilityLabel={title}
           data={items}
+          extraData={showMetadata}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.content}
           ItemSeparatorComponent={CardSeparator}
@@ -150,6 +153,7 @@ export function MediaRow({
           renderItem={({ item }) => (
             <MediaCard
               media={item}
+              showMetadata={showMetadata}
               onPress={() => onMediaPress(item.id)}
             />
           )}

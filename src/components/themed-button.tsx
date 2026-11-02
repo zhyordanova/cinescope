@@ -7,18 +7,21 @@ import { ThemedView } from './themed-view';
 
 type ThemedButtonProps = {
   label: string;
+  accessibilityLabel?: string;
   onPress: () => void;
   disabled?: boolean;
 };
 
 export function ThemedButton({
   label,
+  accessibilityLabel,
   onPress,
   disabled = false,
 }: ThemedButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

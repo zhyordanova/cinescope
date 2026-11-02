@@ -1,5 +1,11 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import {
+  Image as NativeImage,
+  Platform,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 import {
   Breakpoints,
@@ -10,33 +16,64 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
-import { MOBILE_BANNER, WEB_BANNER } from '../constants/mediaAssets';
+import {
+  CINESCOPE_SYMBOL,
+  MOBILE_BANNER,
+  WEB_BANNER,
+} from '../constants/mediaAssets';
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import {
+  CinematicBannerSizing,
+  getCinematicBannerHeight,
+} from './CinematicBannerSizing';
 
 export function getCinematicBannerArtwork(width: number) {
   return width < Breakpoints.tablet ? MOBILE_BANNER : WEB_BANNER;
 }
 
-export function getCinematicBannerHeight(width: number) {
-  return width < Breakpoints.tablet
-    ? 360
-    : width < Breakpoints.desktop
-      ? 380
-      : 600;
-}
-
-export function CinematicBanner() {
-  const width = useResponsiveWidth();
+function BannerArtwork({ width }: { width: number }) {
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(
+    'loading',
+  );
 
   return (
-    <View
-      testID="cinematic-banner"
-      style={[
-        styles.container,
-        Platform.OS === 'web' && styles.webContainer,
-        { height: getCinematicBannerHeight(width) },
-      ]}
-    >
+    <>
+      {status !== 'ready' && (
+        <View
+          testID="cinematic-banner-placeholder"
+          style={styles.placeholder}
+          accessible={status === 'loading'}
+          accessibilityRole={
+            status === 'loading' ? 'progressbar' : undefined
+          }
+          accessibilityLabel={
+            status === 'loading'
+              ? MEDIA_UI_MESSAGES.home.bannerLoading
+              : undefined
+          }
+          accessibilityLiveRegion="polite"
+          accessibilityState={{ busy: status === 'loading' }}
+        >
+          <NativeImage
+            testID="cinematic-banner-symbol"
+            source={CINESCOPE_SYMBOL}
+            defaultSource={CINESCOPE_SYMBOL}
+            style={styles.symbol}
+            resizeMode="contain"
+            accessible={false}
+            aria-hidden
+          />
+          {status === 'loading' && (
+            <ThemedText
+              type="small"
+              themeColor="textSecondary"
+              accessible={false}
+            >
+              {MEDIA_UI_MESSAGES.home.bannerLoading}
+            </ThemedText>
+          )}
+        </View>
+      )}
       <Image
         testID="cinematic-banner-artwork"
         source={getCinematicBannerArtwork(width)}
@@ -47,11 +84,39 @@ export function CinematicBanner() {
         }
         cachePolicy="memory-disk"
         transition={150}
+        onDisplay={() => setStatus('ready')}
+        onError={() => setStatus('error')}
         accessibilityRole="none"
         accessible={false}
         aria-hidden
         accessibilityElementsHidden
         importantForAccessibility="no"
+      />
+    </>
+  );
+}
+
+export function CinematicBanner() {
+  const width = useResponsiveWidth();
+
+  return (
+    <View
+      testID="cinematic-banner"
+      {...(Platform.OS === 'web'
+        ? { dataSet: { cinematicBanner: '' } }
+        : {})}
+      style={[
+        styles.container,
+        Platform.OS === 'web' && styles.webContainer,
+        Platform.OS !== 'web' && {
+          height: getCinematicBannerHeight(width),
+        },
+      ]}
+    >
+      <CinematicBannerSizing />
+      <BannerArtwork
+        key={width < Breakpoints.tablet ? 'mobile' : 'wide'}
+        width={width}
       />
       <View style={styles.copy}>
         <ThemedText
@@ -79,6 +144,22 @@ const styles = StyleSheet.create({
   },
   webContainer: {
     justifyContent: 'flex-start',
+  },
+  placeholder: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    padding: Spacing.lg,
+  },
+  symbol: {
+    width: 96,
+    height: 96,
   },
   artwork: {
     position: 'absolute',
