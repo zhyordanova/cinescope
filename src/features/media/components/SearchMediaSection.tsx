@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
-import { ThemedButton } from '@/components/themed-button';
+import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing, Typography } from '@/constants/theme';
 
@@ -9,6 +10,7 @@ import { useMediaCollection } from '../hooks/useMediaCollection';
 import type { SearchMediaCollection } from '../types/mediaCollection.types';
 
 import { MediaRow } from './MediaRow';
+import { MediaRowSkeleton } from './MediaRowSkeleton';
 
 type SearchMediaSectionProps = {
   collection: SearchMediaCollection;
@@ -19,8 +21,10 @@ export function SearchMediaSection({
   collection,
   onMediaPress,
 }: SearchMediaSectionProps) {
-  const { items, error, isFetching, refetch } =
+  const { items, error, errorUpdatedAt, isFetching, refetch } =
     useMediaCollection(collection);
+
+  const showError = Boolean(error) || (!items && errorUpdatedAt > 0);
 
   return (
     <View style={styles.container}>
@@ -30,6 +34,8 @@ export function SearchMediaSection({
           items={items}
           onMediaPress={onMediaPress}
         />
+      ) : !items && !showError ? (
+        <MediaRowSkeleton title={collection.title} />
       ) : (
         <View style={styles.status}>
           <ThemedText
@@ -38,38 +44,35 @@ export function SearchMediaSection({
           >
             {collection.title}
           </ThemedText>
-          {!error && (
-            <ThemedText
-              themeColor="textSecondary"
-              accessibilityLiveRegion="polite"
-            >
-              {items
-                ? MEDIA_UI_MESSAGES.collection.empty
-                : MEDIA_UI_MESSAGES.collection.loading(
-                    collection.title,
-                  )}
-            </ThemedText>
+          {!showError && (
+            <EmptyState
+              title={MEDIA_UI_MESSAGES.collection.emptyTitle}
+              description={MEDIA_UI_MESSAGES.collection.empty}
+            />
           )}
         </View>
       )}
-      {error && (
+      {showError && (
         <View style={styles.status}>
-          <ThemedText accessibilityRole="alert">
-            {MEDIA_UI_MESSAGES.collection.error(
-              collection.title,
-              error.message,
-            )}
-          </ThemedText>
-          <ThemedButton
-            label={
+          <ErrorState
+            title={MEDIA_UI_MESSAGES.collection.errorTitle}
+            description={
+              MEDIA_UI_MESSAGES.collection.errorDescription
+            }
+            actionLabel={
+              isFetching
+                ? MEDIA_UI_MESSAGES.collection.retryingLabel
+                : MEDIA_UI_MESSAGES.collection.retryLabel
+            }
+            actionAccessibilityLabel={
               isFetching
                 ? MEDIA_UI_MESSAGES.collection.retrying(
                     collection.title,
                   )
                 : MEDIA_UI_MESSAGES.collection.retry(collection.title)
             }
-            disabled={isFetching}
-            onPress={() => void refetch()}
+            isRetrying={isFetching}
+            onRetry={() => void refetch()}
           />
         </View>
       )}

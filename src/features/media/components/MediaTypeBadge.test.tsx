@@ -55,7 +55,7 @@ describe('MediaTypeBadge', () => {
       ).toBeTruthy();
 
       expect(screen.getByText(label)).toBeTruthy();
-      
+
       expect(
         StyleSheet.flatten(
           screen.getByTestId('details-media-type-chip').props.style,

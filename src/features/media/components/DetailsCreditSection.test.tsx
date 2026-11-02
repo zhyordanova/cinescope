@@ -63,7 +63,7 @@ describe('DetailsCreditSection', () => {
     );
 
     expect(queryByTestId('details-test-section')).toBeNull();
-    
+
     expect(
       queryByRole('header', { name: 'Test Details' }),
     ).toBeNull();

@@ -2,10 +2,9 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { Colors, Radii, Sizing, Spacing } from '@/constants/theme';
+import { Colors, Radii, Sizing } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { PosterFallback } from './PosterFallback';
 
 export function DetailsPoster({
   posterUrl,
@@ -58,13 +57,13 @@ export function DetailsPoster({
           />
         </>
       ) : (
-        <ThemedText
-          type="small"
-          themeColor="textSecondary"
-          style={styles.posterFallback}
-        >
-          {MEDIA_UI_MESSAGES.posterUnavailable}
-        </ThemedText>
+        <PosterFallback
+          style={[
+            styles.posterForeground,
+            compact && styles.compactPosterForeground,
+            styles.posterFallback,
+          ]}
+        />
       )}
     </View>
   );
@@ -112,7 +111,6 @@ const styles = StyleSheet.create({
     width: '55%',
   },
   posterFallback: {
-    textAlign: 'center',
-    padding: Spacing.sm,
+    backgroundColor: Colors.surface,
   },
 });

@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useQueries } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,11 +14,19 @@ import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
 import { CinematicBanner } from '../components/CinematicBanner';
 import { MediaRow } from '../components/MediaRow';
+import { MediaCardSizing } from '../components/MediaCardSizing';
 import { SearchMediaSection } from '../components/SearchMediaSection';
 import { CINESCOPE_LOGO } from '../constants/mediaAssets';
 import { MEDIA_COLLECTIONS } from '../constants/mediaCollections';
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
 import type { MediaCollection } from '../types/mediaCollection.types';
+import { mediaSearchOptions } from '../queries/media.queries';
+
+const searchQueries = MEDIA_COLLECTIONS.filter(
+  (collection) => collection.source === 'search',
+).map((collection) =>
+  mediaSearchOptions(collection.query, { page: 1 }),
+);
 
 function SectionSeparator() {
   return <View style={styles.separator} />;
@@ -26,6 +35,10 @@ function SectionSeparator() {
 export default function HomeScreen() {
   const router = useRouter();
   const width = useResponsiveWidth();
+  const searches = useQueries({ queries: searchQueries });
+  const showCuratedMetadata = searches.every(
+    (search) => search.dataUpdatedAt > 0 || search.errorUpdatedAt > 0,
+  );
 
   function openMedia(id: string) {
     router.push({
@@ -36,12 +49,14 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <MediaCardSizing />
       <SafeAreaView
         edges={['top', 'bottom', 'left', 'right']}
         style={styles.container}
       >
         <FlatList<MediaCollection>
           data={MEDIA_COLLECTIONS}
+          extraData={showCuratedMetadata}
           keyExtractor={(collection) => collection.id}
           contentContainerStyle={styles.content}
           ListHeaderComponent={
@@ -73,6 +88,7 @@ export default function HomeScreen() {
                 title={item.title}
                 items={item.items}
                 onMediaPress={openMedia}
+                showMetadata={showCuratedMetadata}
               />
             ) : (
               <SearchMediaSection

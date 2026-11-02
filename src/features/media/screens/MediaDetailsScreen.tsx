@@ -2,7 +2,7 @@ import { useCanGoBack, useLocalSearchParams } from 'expo-router';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedButton } from '@/components/themed-button';
+import { ErrorState } from '@/components/ErrorState';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Breakpoints, Spacing } from '@/constants/theme';
@@ -16,6 +16,7 @@ import { DetailsPoster } from '../components/DetailsPoster';
 import { DetailsTextSection } from '../components/DetailsTextSection';
 import { HomeLogoLink } from '../components/HomeLogoLink';
 import { MediaMetadata } from '../components/MediaMetadata';
+import { MediaDetailsSkeleton } from '../components/MediaDetailsSkeleton';
 import { ProductionDetails } from '../components/ProductionDetails';
 import { useMediaDetails } from '../hooks/useMediaDetails';
 import { isValidMediaId } from '../utils/isValidMediaId';
@@ -32,6 +33,7 @@ export default function MediaDetailsScreen() {
   const {
     data: media,
     error,
+    errorUpdatedAt,
     isPending,
     isFetching,
     refetch,
@@ -40,6 +42,9 @@ export default function MediaDetailsScreen() {
 
   const isDesktopWeb =
     Platform.OS === 'web' && width >= Breakpoints.desktop;
+
+  const showError = Boolean(error) || (!media && errorUpdatedAt > 0);
+  const showSkeleton = isValidId && !media && !showError && isPending;
 
   const title = !isValidId
     ? MEDIA_UI_MESSAGES.details.invalidIdTitle
@@ -66,15 +71,17 @@ export default function MediaDetailsScreen() {
           {(Platform.OS === 'web' || !canGoBack) && (
             <HomeLogoLink width={width} />
           )}
-          {(!media || !isDesktopWeb) && (
-            <ThemedText
-              testID="details-media-title"
-              type="subtitle"
-              accessibilityRole="header"
-            >
-              {title}
-            </ThemedText>
-          )}
+          {!showSkeleton &&
+            (!isValidId || media) &&
+            (!media || !isDesktopWeb) && (
+              <ThemedText
+                testID="details-media-title"
+                type="subtitle"
+                accessibilityRole="header"
+              >
+                {title}
+              </ThemedText>
+            )}
           {!isValidId ? (
             <ThemedText accessibilityRole="alert">
               {MEDIA_ERROR_MESSAGES.invalidId}
@@ -161,35 +168,21 @@ export default function MediaDetailsScreen() {
                 )}
               </View>
             </View>
-          ) : (
-            <ThemedText
-              accessibilityLiveRegion="polite"
-              accessibilityRole={error ? 'alert' : undefined}
-            >
-              {error
-                ? error.message
-                : isPending
-                  ? MEDIA_UI_MESSAGES.details.loading
-                  : null}
-            </ThemedText>
-          )}
-          {isValidId && error && (
-            <>
-              {media && (
-                <ThemedText accessibilityRole="alert">
-                  {error.message}
-                </ThemedText>
-              )}
-              <ThemedButton
-                label={
-                  isFetching
-                    ? MEDIA_UI_MESSAGES.retrying
-                    : MEDIA_UI_MESSAGES.retry
-                }
-                disabled={isFetching}
-                onPress={() => void refetch()}
-              />
-            </>
+          ) : showSkeleton ? (
+            <MediaDetailsSkeleton />
+          ) : null}
+          {isValidId && showError && (
+            <ErrorState
+              title={MEDIA_UI_MESSAGES.details.errorTitle}
+              description={MEDIA_UI_MESSAGES.details.errorDescription}
+              actionLabel={
+                isFetching
+                  ? MEDIA_UI_MESSAGES.details.retrying
+                  : MEDIA_UI_MESSAGES.details.retry
+              }
+              isRetrying={isFetching}
+              onRetry={() => void refetch()}
+            />
           )}
         </ScrollView>
       </SafeAreaView>

@@ -162,7 +162,7 @@ describe('MediaDetailsScreen', () => {
           name: MEDIA_UI_MESSAGES.details.goHome,
         }),
       ).toBeTruthy();
-      
+
       expect(fetchMock).not.toHaveBeenCalled();
     },
   );
@@ -323,7 +323,7 @@ describe('MediaDetailsScreen', () => {
 
       expect(
         screen.queryByRole('button', {
-          name: MEDIA_UI_MESSAGES.retry,
+          name: MEDIA_UI_MESSAGES.details.retry,
         }),
       ).toBeNull();
 
@@ -344,7 +344,9 @@ describe('MediaDetailsScreen', () => {
     await renderDetails();
 
     expect(
-      screen.getByText(MEDIA_UI_MESSAGES.details.loading),
+      screen.getByRole('progressbar', {
+        name: MEDIA_UI_MESSAGES.details.loading,
+      }),
     ).toBeTruthy();
 
     expect(screen.queryByText(movie.Title)).toBeNull();
@@ -472,7 +474,9 @@ describe('MediaDetailsScreen', () => {
       headerNames.indexOf(MEDIA_UI_MESSAGES.details.overviewTitle),
     );
     expect(
-      screen.queryByText(MEDIA_UI_MESSAGES.details.loading),
+      screen.queryByRole('progressbar', {
+        name: MEDIA_UI_MESSAGES.details.loading,
+      }),
     ).toBeNull();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -579,14 +583,40 @@ describe('MediaDetailsScreen', () => {
     await renderDetails();
 
     expect(await screen.findByRole('alert')).toBeTruthy();
-    expect(screen.getByText(omdbFailure.Error)).toBeTruthy();
+    expect(screen.queryByTestId('details-skeleton')).toBeNull();
+
+    expect(screen.getByRole('alert').props.children).toBe(
+      MEDIA_UI_MESSAGES.details.errorTitle,
+    );
+
+    expect(
+      screen.getByText(MEDIA_UI_MESSAGES.details.errorDescription),
+    ).toBeTruthy();
+
+    expect(
+      screen.queryByText(omdbFailure.Error, { exact: false }),
+    ).toBeNull();
+
+    expect(screen.queryByTestId('details-layout')).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     await fireEvent.press(
-      screen.getByRole('button', { name: MEDIA_UI_MESSAGES.retry }),
+      screen.getByRole('button', {
+        name: MEDIA_UI_MESSAGES.details.retry,
+      }),
     );
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+    const retryButton = await screen.findByRole('button', {
+      name: MEDIA_UI_MESSAGES.details.retrying,
+      disabled: true,
+    });
+
+    await fireEvent.press(retryButton);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.queryByTestId('details-skeleton')).toBeNull();
 
     await act(async () => retryResponse.resolve(respond(movie)));
 
@@ -595,7 +625,9 @@ describe('MediaDetailsScreen', () => {
     expect(screen.queryByRole('alert')).toBeNull();
 
     expect(
-      screen.queryByRole('button', { name: MEDIA_UI_MESSAGES.retry }),
+      screen.queryByRole('button', {
+        name: MEDIA_UI_MESSAGES.details.retry,
+      }),
     ).toBeNull();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -623,15 +655,25 @@ describe('MediaDetailsScreen', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeTruthy();
-      expect(screen.getByText('Request limit reached!')).toBeTruthy();
+      expect(screen.getByRole('alert').props.children).toBe(
+        MEDIA_UI_MESSAGES.details.errorTitle,
+      );
     });
+
+    expect(screen.queryByTestId('details-skeleton')).toBeNull();
+
+    expect(
+      screen.queryByText('Request limit reached!', { exact: false }),
+    ).toBeNull();
 
     expect(
       screen.getByRole('header', { name: movie.Title }),
     ).toBeTruthy();
 
     expect(
-      screen.getByRole('button', { name: MEDIA_UI_MESSAGES.retry }),
+      screen.getByRole('button', {
+        name: MEDIA_UI_MESSAGES.details.retry,
+      }),
     ).toBeTruthy();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);

@@ -13,12 +13,14 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react-native/pure';
 import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import { Platform, StyleSheet } from 'react-native';
 
 import { MEDIA_COLLECTIONS } from '../constants/mediaCollections';
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
@@ -71,11 +73,18 @@ function errorResponse() {
 }
 
 async function renderHome() {
-  return render(
+  const result = await render(
     <QueryClientProvider client={client}>
       <HomeScreen />
     </QueryClientProvider>,
   );
+  await fireEvent(
+    screen.getByTestId('cinematic-banner-artwork', {
+      includeHiddenElements: true,
+    }),
+    'display',
+  );
+  return result;
 }
 
 beforeEach(() => {
@@ -100,6 +109,174 @@ afterEach(async () => {
 });
 
 describe('HomeScreen', () => {
+  it('includes card sizing CSS once while loading and after collections load on Web', async () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    const response = Promise.withResolvers<void>();
+    jest.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      await response.promise;
+      return searchResponse();
+    });
+
+    await renderHome();
+    const expectOneCardStyle = () => {
+      expect(
+        screen.root?.queryAll(
+          (node) =>
+            node.type === 'style' &&
+            node.props.dangerouslySetInnerHTML?.__html.includes(
+              'width: clamp(120px',
+            ),
+        ),
+      ).toHaveLength(1);
+    };
+
+    expect(screen.getAllByTestId('media-row-skeleton')).toHaveLength(
+      3,
+    );
+    expectOneCardStyle();
+
+    await act(async () => response.resolve());
+    await waitFor(() => {
+      expect(
+        screen.queryAllByTestId('media-row-skeleton'),
+      ).toHaveLength(0);
+    });
+    expectOneCardStyle();
+  });
+
+  it('reveals curated metadata after all initial searches settle and keeps it visible during retry', async () => {
+    const batman = Promise.withResolvers<Response>();
+    const journey = Promise.withResolvers<Response>();
+    const retry = Promise.withResolvers<Response>();
+    let journeyCalls = 0;
+    const fetchMock = jest
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async (input) => {
+        const query = new URL(String(input)).searchParams.get('s');
+        if (query === 'Batman') return batman.promise;
+        if (query === 'Journey') {
+          journeyCalls += 1;
+          return journeyCalls === 1 ? journey.promise : retry.promise;
+        }
+        if (query === 'Christmas') return searchResponse([omdbMovie]);
+        throw new Error(UNEXPECTED_FETCH_MESSAGE);
+      });
+
+    await renderHome();
+    const title = () =>
+      screen.getByText('Inception', { includeHiddenElements: true });
+    expect(StyleSheet.flatten(title().props.style).opacity).toBe(0);
+    expect(
+      StyleSheet.flatten(
+        within(
+          screen.getByRole('button', {
+            name: MEDIA_UI_MESSAGES.openMedia(
+              'Inception',
+              'movie',
+              '2010',
+            ),
+          }),
+        ).getByText('2010', { includeHiddenElements: true }).props
+          .style,
+      ).opacity,
+    ).toBe(0);
+    await fireEvent.press(
+      screen.getByRole('button', {
+        name: MEDIA_UI_MESSAGES.openMedia(
+          'Inception',
+          'movie',
+          '2010',
+        ),
+      }),
+    );
+    expect(push).toHaveBeenCalledTimes(1);
+
+    await act(async () => batman.resolve(searchResponse([])));
+    expect(StyleSheet.flatten(title().props.style).opacity).toBe(0);
+    await act(async () => journey.resolve(errorResponse()));
+    await waitFor(() => {
+      expect(
+        StyleSheet.flatten(title().props.style).opacity,
+      ).not.toBe(0);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    await fireEvent.press(
+      screen.getByRole('button', {
+        name: MEDIA_UI_MESSAGES.collection.retry(
+          MEDIA_COLLECTIONS[2].title,
+        ),
+      }),
+    );
+    await screen.findByRole('button', {
+      name: MEDIA_UI_MESSAGES.collection.retrying(
+        MEDIA_COLLECTIONS[2].title,
+      ),
+      disabled: true,
+    });
+    expect(StyleSheet.flatten(title().props.style).opacity).not.toBe(
+      0,
+    );
+    await act(async () =>
+      retry.resolve(searchResponse([omdbSeries])),
+    );
+    await screen.findByText(omdbSeries.Title);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('shows independent friendly failures with distinct retry controls when every search fails', async () => {
+    jest
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async () => errorResponse());
+
+    await renderHome();
+
+    await waitFor(() =>
+      expect(screen.getAllByRole('alert')).toHaveLength(3),
+    );
+
+    for (const collection of MEDIA_COLLECTIONS) {
+      expect(
+        screen.getByRole('header', { name: collection.title }),
+      ).toBeTruthy();
+
+      if (collection.source === 'search') {
+        expect(
+          screen.getByRole('button', {
+            name: MEDIA_UI_MESSAGES.collection.retry(
+              collection.title,
+            ),
+          }),
+        ).toBeTruthy();
+      }
+    }
+
+    expect(
+      screen.queryByText(omdbFailure.Error, { exact: false }),
+    ).toBeNull();
+
+    expect(
+      screen.queryByText(MEDIA_UI_MESSAGES.collection.emptyTitle),
+    ).toBeNull();
+
+    expect(screen.queryByTestId('media-row-skeleton')).toBeNull();
+
+    await fireEvent.press(
+      screen.getByRole('button', {
+        name: MEDIA_UI_MESSAGES.openMedia(
+          'Inception',
+          'movie',
+          '2010',
+        ),
+      }),
+    );
+
+    expect(push).toHaveBeenCalledWith({
+      pathname: '/media/[id]',
+      params: { id: 'tt1375666' },
+    });
+  });
+
   it('renders the approved order with three Search requests, no Details requests, and ID-only navigation', async () => {
     const fetchMock = jest
       .spyOn(globalThis, 'fetch')
@@ -190,6 +367,7 @@ describe('HomeScreen', () => {
 
   it('keeps curated and successful rows usable while other sections load or fail, and retries only the failed section', async () => {
     const batman = Promise.withResolvers<Response>();
+    const journeyRetry = Promise.withResolvers<Response>();
 
     let journeyCalls = 0;
 
@@ -202,7 +380,7 @@ describe('HomeScreen', () => {
           journeyCalls += 1;
           return journeyCalls === 1
             ? errorResponse()
-            : searchResponse([omdbSeries]);
+            : journeyRetry.promise;
         }
 
         if (query === 'Christmas') return searchResponse([omdbMovie]);
@@ -213,19 +391,33 @@ describe('HomeScreen', () => {
     await renderHome();
 
     await waitFor(() => {
-      expect(screen.getByRole('alert').props.children).toContain(
-        omdbFailure.Error,
+      expect(screen.getByRole('alert').props.children).toBe(
+        MEDIA_UI_MESSAGES.collection.errorTitle,
       );
 
       expect(screen.getByText(omdbMovie.Title)).toBeTruthy();
     });
 
     expect(
-      screen.getByText(
-        MEDIA_UI_MESSAGES.collection.loading(
+      screen.queryByText(omdbFailure.Error, { exact: false }),
+    ).toBeNull();
+
+    expect(
+      screen.getByText(MEDIA_UI_MESSAGES.collection.errorDescription),
+    ).toBeTruthy();
+
+    expect(
+      screen.getAllByRole('header', {
+        name: MEDIA_COLLECTIONS[2].title,
+      }),
+    ).toHaveLength(1);
+
+    expect(
+      screen.getByRole('progressbar', {
+        name: MEDIA_UI_MESSAGES.collection.loading(
           MEDIA_COLLECTIONS[1].title,
         ),
-      ),
+      }),
     ).toBeTruthy();
 
     expect(screen.getByText('Inception')).toBeTruthy();
@@ -238,6 +430,30 @@ describe('HomeScreen', () => {
       }),
     );
 
+    const retryButton = await screen.findByRole('button', {
+      name: MEDIA_UI_MESSAGES.collection.retrying(
+        MEDIA_COLLECTIONS[2].title,
+      ),
+      disabled: true,
+    });
+
+    expect(screen.getByRole('alert')).toBeTruthy();
+
+    expect(
+      screen.queryByRole('progressbar', {
+        name: MEDIA_UI_MESSAGES.collection.loading(
+          MEDIA_COLLECTIONS[2].title,
+        ),
+      }),
+    ).toBeNull();
+
+    await fireEvent.press(retryButton);
+    expect(journeyCalls).toBe(2);
+
+    await act(async () => {
+      journeyRetry.resolve(searchResponse([omdbSeries]));
+    });
+
     await waitFor(() => {
       expect(screen.getByText(omdbSeries.Title)).toBeTruthy();
     });
@@ -247,11 +463,11 @@ describe('HomeScreen', () => {
     expect(journeyCalls).toBe(2);
 
     expect(
-      screen.getByText(
-        MEDIA_UI_MESSAGES.collection.loading(
+      screen.getByRole('progressbar', {
+        name: MEDIA_UI_MESSAGES.collection.loading(
           MEDIA_COLLECTIONS[1].title,
         ),
-      ),
+      }),
     ).toBeTruthy();
 
     await act(async () => {
@@ -264,7 +480,14 @@ describe('HomeScreen', () => {
       ).toBeTruthy();
     });
 
+    expect(screen.queryByRole('progressbar')).toBeNull();
     expect(screen.queryByText(omdbEpisode.Title)).toBeNull();
+
+    expect(
+      screen.getByRole('header', {
+        name: MEDIA_UI_MESSAGES.collection.emptyTitle,
+      }),
+    ).toBeTruthy();
   });
 
   it('keeps cached cards visible on refresh failure and disables retry while retrying', async () => {
@@ -308,6 +531,8 @@ describe('HomeScreen', () => {
       expect(screen.getByRole('alert')).toBeTruthy();
     });
 
+    expect(screen.queryByRole('progressbar')).toBeNull();
+
     await fireEvent.press(
       screen.getByRole('button', {
         name: MEDIA_UI_MESSAGES.collection.retry(
@@ -328,6 +553,7 @@ describe('HomeScreen', () => {
     });
 
     expect(screen.getByText(omdbMovie.Title)).toBeTruthy();
+    expect(screen.queryByRole('progressbar')).toBeNull();
 
     await act(async () => {
       batmanRetry.resolve(searchResponse([omdbSeries]));

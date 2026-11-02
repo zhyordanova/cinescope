@@ -75,7 +75,7 @@ describe('BehindTheStory', () => {
     );
 
     expect(queryByTestId('details-credit-writer')).toBeNull();
-    
+
     expect(
       queryByText(MEDIA_UI_MESSAGES.details.writerLabel),
     ).toBeNull();
