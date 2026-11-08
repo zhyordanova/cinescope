@@ -8,8 +8,8 @@ import { StyleSheet } from 'react-native';
 
 import { Colors, Radii, Spacing } from '@/constants/theme';
 
-import { MEDIA_TYPE_LABELS } from '../constants/mediaUiMessages';
-import type { MediaType } from '../types/media.types';
+import { MEDIA_TYPE_LABELS } from '../../constants/mediaUiMessages';
+import type { MediaType } from '../../types/media.types';
 
 import { MediaTypeBadge } from './MediaTypeBadge';
 

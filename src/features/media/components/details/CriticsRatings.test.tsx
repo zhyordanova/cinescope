@@ -8,8 +8,8 @@ import { StyleSheet } from 'react-native';
 
 import { Colors, Spacing } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import type { MediaRating } from '../types/media.types';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import type { MediaRating } from '../../types/media.types';
 
 import { CriticsRatings } from './CriticsRatings';
 

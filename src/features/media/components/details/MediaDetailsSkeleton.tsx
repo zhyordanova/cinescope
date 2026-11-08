@@ -7,7 +7,7 @@ import {
 
 import { Spacing } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 import { DetailsInformationSkeleton } from './DetailsInformationSkeleton';
 import { DetailsPosterSkeleton } from './DetailsPosterSkeleton';
 import { MediaDetailsSkeletonStyles } from './MediaDetailsSkeletonStyles';

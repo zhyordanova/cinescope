@@ -19,12 +19,12 @@ import {
 } from '@/constants/theme';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import type { MediaSummary } from '../types/media.types';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import type { MediaSummary } from '../../types/media.types';
 
-import { MediaTypeBadge } from './MediaTypeBadge';
+import { MediaTypeBadge } from '../shared/MediaTypeBadge';
 import { getMediaCardWidth } from './MediaCardSizing';
-import { PosterFallback } from './PosterFallback';
+import { PosterFallback } from '../shared/PosterFallback';
 import { MediaCardTextSkeleton } from './MediaCardTextSkeleton';
 
 type MediaCardProps = {

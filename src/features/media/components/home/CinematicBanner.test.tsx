@@ -14,8 +14,8 @@ import {
   screen,
 } from '@testing-library/react-native/pure';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import { CINESCOPE_SYMBOL } from '../constants/mediaAssets';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import { CINESCOPE_SYMBOL } from '../../constants/mediaAssets';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
 import {
@@ -282,13 +282,13 @@ describe('CinematicBanner', () => {
 
   it('selects mobile and wide artwork at the approved responsive breakpoint', () => {
     expect(getCinematicBannerArtwork(390)).toBe(
-      require('../../../../assets/CinematicBanner-mobile.png'),
+      require('../../../../../assets/CinematicBanner-mobile.png'),
     );
     expect(getCinematicBannerArtwork(600)).toBe(
-      require('../../../../assets/CinematicBanner-web.png'),
+      require('../../../../../assets/CinematicBanner-web.png'),
     );
     expect(getCinematicBannerArtwork(1440)).toBe(
-      require('../../../../assets/CinematicBanner-web.png'),
+      require('../../../../../assets/CinematicBanner-web.png'),
     );
   });
 });

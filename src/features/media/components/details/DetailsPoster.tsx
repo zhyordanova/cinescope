@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Colors, Radii, Sizing } from '@/constants/theme';
 
-import { PosterFallback } from './PosterFallback';
+import { PosterFallback } from '../shared/PosterFallback';
 
 export function DetailsPoster({
   posterUrl,

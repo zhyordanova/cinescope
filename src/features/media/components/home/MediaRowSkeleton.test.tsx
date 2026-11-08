@@ -14,7 +14,7 @@ import {
 } from '@/constants/theme';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 
 import { MediaRowSkeleton } from './MediaRowSkeleton';
 

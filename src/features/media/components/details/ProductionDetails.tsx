@@ -1,5 +1,5 @@
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import type { MediaType } from '../types/media.types';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import type { MediaType } from '../../types/media.types';
 import { DetailsCreditSection } from './DetailsCreditSection';
 
 export function ProductionDetails({

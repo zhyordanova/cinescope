@@ -10,13 +10,13 @@ import {
 import {
   MEDIA_TYPE_LABELS,
   MEDIA_UI_MESSAGES,
-} from '../constants/mediaUiMessages';
+} from '../../constants/mediaUiMessages';
 import { Colors } from '@/constants/theme';
 import {
   movieSummary,
   seriesSummary,
-} from '../test-utils/mediaFixtures';
-import type { MediaSummary } from '../types/media.types';
+} from '../../test-utils/mediaFixtures';
+import type { MediaSummary } from '../../types/media.types';
 
 import { MediaRow } from './MediaRow';
 

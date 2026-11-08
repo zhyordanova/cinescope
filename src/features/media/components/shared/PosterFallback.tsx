@@ -10,8 +10,8 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Radii, Sizing, Spacing } from '@/constants/theme';
 
-import { CINESCOPE_SYMBOL } from '../constants/mediaAssets';
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { CINESCOPE_SYMBOL } from '../../constants/mediaAssets';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 
 type PosterFallbackProps = {
   accessible?: boolean;

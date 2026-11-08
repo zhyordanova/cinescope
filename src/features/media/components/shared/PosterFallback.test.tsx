@@ -9,7 +9,7 @@ import { StyleSheet } from 'react-native';
 
 import { Colors, Radii, Sizing } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 
 import { PosterFallback } from './PosterFallback';
 
@@ -61,7 +61,7 @@ describe('PosterFallback', () => {
     });
 
     expect(symbol.props.source).toEqual(
-      require('../../../../assets/cinescope-symbol.png'),
+      require('../../../../../assets/cinescope-symbol.png'),
     );
 
     expect(symbol.props.contentFit).toBe('contain');

@@ -6,7 +6,7 @@ import {
 } from '@testing-library/react-native/pure';
 import { Platform, StyleSheet } from 'react-native';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 import { MediaDetailsSkeleton } from './MediaDetailsSkeleton';
 
 jest.mock('@/global.css', () => ({}));

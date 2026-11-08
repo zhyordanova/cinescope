@@ -9,7 +9,7 @@ import { Platform, StyleSheet } from 'react-native';
 
 import { Breakpoints, Colors } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 
 import { HomeLogoLink } from './HomeLogoLink';
 

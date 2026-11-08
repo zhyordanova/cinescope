@@ -4,7 +4,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing, Typography } from '@/constants/theme';
 import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 
 import { getMediaCardWidth } from './MediaCardSizing';
 import { MediaCardSkeleton } from './MediaCardSkeleton';

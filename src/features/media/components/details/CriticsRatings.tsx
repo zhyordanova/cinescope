@@ -4,8 +4,8 @@ import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Radii, Spacing } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import type { MediaRating } from '../types/media.types';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import type { MediaRating } from '../../types/media.types';
 
 import type { PlatformSymbolNames } from './platformSymbol.types';
 

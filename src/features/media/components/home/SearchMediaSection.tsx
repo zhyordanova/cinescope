@@ -5,9 +5,9 @@ import { ErrorState } from '@/components/ErrorState';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing, Typography } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import { useMediaCollection } from '../hooks/useMediaCollection';
-import type { SearchMediaCollection } from '../types/mediaCollection.types';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import { useMediaCollection } from '../../hooks/useMediaCollection';
+import type { SearchMediaCollection } from '../../types/mediaCollection.types';
 
 import { MediaRow } from './MediaRow';
 import { MediaRowSkeleton } from './MediaRowSkeleton';

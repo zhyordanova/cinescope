@@ -3,8 +3,8 @@ import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Radii, Spacing } from '@/constants/theme';
 
-import { MEDIA_TYPE_LABELS } from '../constants/mediaUiMessages';
-import type { MediaType } from '../types/media.types';
+import { MEDIA_TYPE_LABELS } from '../../constants/mediaUiMessages';
+import type { MediaType } from '../../types/media.types';
 
 export function MediaTypeBadge({
   mediaType,

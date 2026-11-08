@@ -4,10 +4,10 @@ import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import type { MediaType } from '../types/media.types';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import type { MediaType } from '../../types/media.types';
 
-import { MediaTypeBadge } from './MediaTypeBadge';
+import { MediaTypeBadge } from '../shared/MediaTypeBadge';
 import type { PlatformSymbolNames } from './platformSymbol.types';
 
 type MetadataIcon = 'calendar' | 'clock' | 'tv';

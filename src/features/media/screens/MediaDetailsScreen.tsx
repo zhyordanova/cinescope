@@ -10,14 +10,14 @@ import { useResponsiveWidth } from '@/hooks/use-responsive-width';
 
 import { MEDIA_ERROR_MESSAGES } from '../constants/mediaErrorMessages';
 import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import { BehindTheStory } from '../components/BehindTheStory';
-import { CriticsRatings } from '../components/CriticsRatings';
-import { DetailsPoster } from '../components/DetailsPoster';
-import { DetailsTextSection } from '../components/DetailsTextSection';
-import { HomeLogoLink } from '../components/HomeLogoLink';
-import { MediaMetadata } from '../components/MediaMetadata';
-import { MediaDetailsSkeleton } from '../components/MediaDetailsSkeleton';
-import { ProductionDetails } from '../components/ProductionDetails';
+import { BehindTheStory } from '../components/details/BehindTheStory';
+import { CriticsRatings } from '../components/details/CriticsRatings';
+import { DetailsPoster } from '../components/details/DetailsPoster';
+import { DetailsTextSection } from '../components/details/DetailsTextSection';
+import { HomeLogoLink } from '../components/details/HomeLogoLink';
+import { MediaMetadata } from '../components/details/MediaMetadata';
+import { MediaDetailsSkeleton } from '../components/details/MediaDetailsSkeleton';
+import { ProductionDetails } from '../components/details/ProductionDetails';
 import { useMediaDetails } from '../hooks/useMediaDetails';
 import { isValidMediaId } from '../utils/isValidMediaId';
 

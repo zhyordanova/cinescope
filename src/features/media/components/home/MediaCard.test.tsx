@@ -11,11 +11,11 @@ import { Colors, Spacing, Typography } from '@/constants/theme';
 import {
   MEDIA_TYPE_LABELS,
   MEDIA_UI_MESSAGES,
-} from '../constants/mediaUiMessages';
+} from '../../constants/mediaUiMessages';
 import {
   movieSummary,
   seriesSummary,
-} from '../test-utils/mediaFixtures';
+} from '../../test-utils/mediaFixtures';
 
 import { MediaCard } from './MediaCard';
 

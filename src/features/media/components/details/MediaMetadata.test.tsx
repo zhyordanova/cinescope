@@ -8,7 +8,7 @@ import { StyleSheet } from 'react-native';
 
 import { Colors, Spacing } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 
 import { MediaMetadata } from './MediaMetadata';
 

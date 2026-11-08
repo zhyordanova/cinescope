@@ -20,8 +20,8 @@ import {
   CINESCOPE_SYMBOL,
   MOBILE_BANNER,
   WEB_BANNER,
-} from '../constants/mediaAssets';
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+} from '../../constants/mediaAssets';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 import {
   CinematicBannerSizing,
   getCinematicBannerHeight,

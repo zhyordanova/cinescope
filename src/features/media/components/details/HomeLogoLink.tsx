@@ -5,8 +5,8 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { Breakpoints, Colors } from '@/constants/theme';
 
-import { CINESCOPE_LOGO } from '../constants/mediaAssets';
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { CINESCOPE_LOGO } from '../../constants/mediaAssets';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 
 export function HomeLogoLink({ width }: { width: number }) {
   const [isFocused, setIsFocused] = useState(false);

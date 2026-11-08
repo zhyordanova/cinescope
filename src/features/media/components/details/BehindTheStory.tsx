@@ -1,4 +1,4 @@
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
 import { DetailsCreditSection } from './DetailsCreditSection';
 
 export function BehindTheStory({

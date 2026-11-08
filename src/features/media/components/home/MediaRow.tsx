@@ -16,8 +16,8 @@ import {
   Typography,
 } from '@/constants/theme';
 
-import { MEDIA_UI_MESSAGES } from '../constants/mediaUiMessages';
-import type { MediaSummary } from '../types/media.types';
+import { MEDIA_UI_MESSAGES } from '../../constants/mediaUiMessages';
+import type { MediaSummary } from '../../types/media.types';
 
 import { MediaCard } from './MediaCard';
 
