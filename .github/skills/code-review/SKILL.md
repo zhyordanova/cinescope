@@ -1,7 +1,7 @@
 ---
 name: code-review
-description: "Review CineScope code changes for correctness, architecture, React Native compatibility, and regressions. Use for PR reviews or when asked to review an implementation."
-argument-hint: "Describe the change or provide the files or diff to review"
+description: 'Review CineScope code changes for correctness, architecture, React Native compatibility, and regressions. Use for PR reviews or when asked to review an implementation.'
+argument-hint: 'Describe the change or provide the files or diff to review'
 ---
 
 # CineScope Code Review

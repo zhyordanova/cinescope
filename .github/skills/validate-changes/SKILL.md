@@ -1,7 +1,7 @@
 ---
 name: validate-changes
-description: "Validate CineScope implementation changes with relevant tests, TypeScript, ESLint, and regression checks. Use after code changes or before merging a PR."
-argument-hint: "Describe the changes or files to validate"
+description: 'Validate CineScope implementation changes with relevant tests, TypeScript, ESLint, and regression checks. Use after code changes or before merging a PR.'
+argument-hint: 'Describe the changes or files to validate'
 ---
 
 # CineScope Change Validation

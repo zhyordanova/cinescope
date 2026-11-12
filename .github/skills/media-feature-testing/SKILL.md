@@ -1,7 +1,7 @@
 ---
 name: media-feature-testing
-description: "Write, improve, or troubleshoot tests for CineScope media features. Use when testing media API and repository behavior, OMDb mapping and failures, TanStack Query hooks, loading/error/empty UI states, or media navigation."
-argument-hint: "Describe the media behavior or test failure"
+description: 'Write, improve, or troubleshoot tests for CineScope media features. Use when testing media API and repository behavior, OMDb mapping and failures, TanStack Query hooks, loading/error/empty UI states, or media navigation.'
+argument-hint: 'Describe the media behavior or test failure'
 ---
 
 # Media Feature Testing
